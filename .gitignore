@@ -5,3 +5,6 @@ reports
 Clio reports.ipynb
 clio.py
 clio_functions.py
+legacy.py
+*.csv
+.DS_Store
