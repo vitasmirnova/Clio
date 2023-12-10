@@ -1,10 +1,10 @@
-import matplotlib.pyplot as plt
-from wordcloud import WordCloud
-from openai import OpenAI
+# import matplotlib.pyplot as plt
+# from wordcloud import WordCloud
+#from openai import OpenAI
 import pandas as pd
 import streamlit as st
 import plotly.express as px
-import streamlit_pandas as sp
+# import streamlit_pandas as sp
 
 st.title('Clio reports analyser')
 
@@ -145,17 +145,17 @@ st.plotly_chart(fig, use_container_width=True)
 
 
 
-st.header('Matter Descriptions')
-all_descriptions = ' '.join(new_RR['Matter Description'].astype(str))
+# st.header('Matter Descriptions')
+# all_descriptions = ' '.join(new_RR['Matter Description'].astype(str))
 
-# Generate the word cloud
-wordcloud = WordCloud(width=800, height=400,
-                      background_color='white').generate(all_descriptions)
+# # Generate the word cloud
+# wordcloud = WordCloud(width=800, height=400,
+#                       background_color='white').generate(all_descriptions)
 
-# Plot the word cloud using Streamlit
-st.image(wordcloud.to_array())
+# # Plot the word cloud using Streamlit
+# st.image(wordcloud.to_array())
 
-# Optionally, you can display the raw text
+# # Optionally, you can display the raw text
 
 
 
