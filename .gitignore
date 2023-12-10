@@ -1,0 +1,7 @@
+clio
+__pycache__
+.ipynb_checkpoints
+reports
+Clio reports.ipynb
+clio.py
+clio_functions.py
