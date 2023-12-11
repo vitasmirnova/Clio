@@ -126,35 +126,6 @@ st.plotly_chart(fig, use_container_width=True)
 
 # Users' Hours by Practice Area
 
-# ПЕРЕДЕЛАТЬ, СДЕЛАТЬ ФОРМУ НА ОТПРАВКУ ЗП И БЕЗ ТЕКСТА? ЕЩЕ ЛУЧШЕ ДОБАВИТЬ ЗП НА МОМЕНТЕ КОЛЛАБА
-
-
-def get_employee_salaries(employees):
-    # Dictionary to store employee salaries
-    employee_salaries = {}
-
-    # Iterate through each employee
-    for employee in employees:
-        # Prompt the user to enter the salary for the current employee
-        salary = st.text_input(
-            f"Enter the monthly salary for {employee} in USD:", key=f"{employee}_salary", value="")
-
-        # Validate and store the salary in the dictionary
-        try:
-            employee_salaries[employee] = int(salary)
-        except ValueError:
-            st.warning("Invalid input. Please enter a valid integer number.")
-            # Allow the user to correct the input
-            st.text_input("Enter the correct monthly salary:",
-                          key=f"{employee}_correction", value="")
-
-    return employee_salaries
-
-
-employees = list(MP['User'].unique())
-salaries = get_employee_salaries(employees)
-
-
 MP = MP.drop(columns=['Activity Type', 'Description', 'Rate',
                       'Total', 'Invoice Number', 'Invoice Status', 'Invoice Last Payment Date'])
 
@@ -163,8 +134,6 @@ MP['user_total_hours'] = MP['User'].map(
 
 MP['matter_prct_of_total_time'] = MP['Quantity'] / \
     MP['user_total_hours']
-
-MP['user_salary'] = MP['User'].map(salaries)
 
 MP['matter_cost_in_salary'] = MP['user_salary'] * \
     MP['matter_prct_of_total_time']
@@ -177,6 +146,7 @@ fig = px.bar(b, x='Practice Area', y='matter_cost_in_salary', title='Users Salar
              hover_data=['User'], labels={'matter_cost_in_salary': 'Cost in Salary', 'Practice Area': 'Practice Area'})
 
 st.plotly_chart(fig, use_container_width=True)
+
 
 # Chart 1
 grouped_data = MP.groupby(['Practice Area', 'User'])[
@@ -193,6 +163,7 @@ fig = px.bar(
 )
 st.plotly_chart(fig, use_container_width=True)
 
+
 # Chart 2
 a = MP.copy()
 a['Date'] = pd.to_datetime(a['Date'], format='%d/%m/%Y')
@@ -208,6 +179,4 @@ cumulative_data = a.groupby('Month')['Quantity'].sum().reset_index()
 fig = px.bar(cumulative_data, x='Month', y='Quantity',
              labels={'Quantity': 'Cumulative Hours'})
 fig.update_layout(title='Hours Per Month')
-
-# Show the interactive plot
 st.plotly_chart(fig, use_container_width=True)
