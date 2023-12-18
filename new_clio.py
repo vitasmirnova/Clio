@@ -1,6 +1,8 @@
 # import matplotlib.pyplot as plt
 # from wordcloud import WordCloud
 # from openai import OpenAI
+import plotly.graph_objs as go
+from plotly.subplots import make_subplots
 import pandas as pd
 import streamlit as st
 import plotly.express as px
@@ -57,7 +59,7 @@ st.write(new_RR)
 # Charting data
 st.header('Charts')
 
-# Chart 1: Revenue by Practice Area
+# Chart 1: Revenue by Practice Area, MAIN
 
 st.header("Revenue by Practice Area")
 fig = px.bar(new_RR, x='Practice Area', y='USD_collected_time',
@@ -124,6 +126,10 @@ st.plotly_chart(fig, use_container_width=True)
 
 # Working with MP
 
+# Creating Data Editor
+st.header('Data Editor')
+MP = st.data_editor(MP, num_rows='dynamic', hide_index=False)
+
 # Users' Hours by Practice Area
 
 MP = MP.drop(columns=['Activity Type', 'Description', 'Rate',
@@ -139,7 +145,7 @@ MP['matter_cost_in_salary'] = MP['user_salary'] * \
     MP['matter_prct_of_total_time']
 
 
-# Chart 0
+# Chart 0: Users Salary Allocations by Practice Area, MAIN
 b = MP.groupby(['Practice Area', 'User'])[
     'matter_cost_in_salary'].sum().reset_index()
 fig = px.bar(b, x='Practice Area', y='matter_cost_in_salary', title='Users Salary Allocations by Practice Area',
@@ -148,7 +154,7 @@ fig = px.bar(b, x='Practice Area', y='matter_cost_in_salary', title='Users Salar
 st.plotly_chart(fig, use_container_width=True)
 
 
-# Chart 1
+# Chart 1: Users' Hours by Practice Area
 grouped_data = MP.groupby(['Practice Area', 'User'])[
     'Quantity'].sum().reset_index()
 
@@ -164,7 +170,7 @@ fig = px.bar(
 st.plotly_chart(fig, use_container_width=True)
 
 
-# Chart 2
+# Chart 2: Hours Per Month
 a = MP.copy()
 a['Date'] = pd.to_datetime(a['Date'], format='%d/%m/%Y')
 
@@ -179,4 +185,39 @@ cumulative_data = a.groupby('Month')['Quantity'].sum().reset_index()
 fig = px.bar(cumulative_data, x='Month', y='Quantity',
              labels={'Quantity': 'Cumulative Hours'})
 fig.update_layout(title='Hours Per Month')
+st.plotly_chart(fig, use_container_width=True)
+
+
+# Assuming new_RR and b are your dataframes
+
+# Chart One: Revenue by Practice Area
+fig = go.Figure()
+fig.add_trace(go.Bar(
+    x=new_RR['Practice Area'],
+    y=new_RR['USD_collected_time'],
+    name='Total Revenue',
+    marker=dict(color=px.colors.qualitative.G10)
+))
+
+# Chart Two: Users Salary Allocations by Practice Area
+# Adding bars with black outline
+fig.add_trace(go.Bar(
+    x=b['Practice Area'],
+    y=b['matter_cost_in_salary'],
+    name='Cost in Salary',
+    marker=dict(color='rgba(255, 255, 255, 0)',
+                line=dict(color='black', width=2)),
+    hovertext=b['User']
+))
+
+# Update the layout
+fig.update_layout(
+    title='Combined Revenue Analysis and Salary Allocations by Practice Area',
+    xaxis_title='Practice Area',
+    yaxis_title='Amount',
+    barmode='overlay'  # This ensures the bars are placed on top of each other
+)
+
+# Display the figure in Streamlit
+st.header("Revenue and Salary Allocations by Practice Area")
 st.plotly_chart(fig, use_container_width=True)
