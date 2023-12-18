@@ -154,6 +154,22 @@ fig = px.bar(b, x='Practice Area', y='matter_cost_in_salary', title='Users Salar
 st.plotly_chart(fig, use_container_width=True)
 
 
+# Chart 0: Users Salary Allocations by Practice Area vs Collected Time, MAIN 2
+a = RR.groupby(['Practice Area'])['USD_collected_time'].sum()
+a = a.to_frame()
+a_dict = a.to_dict()['USD_collected_time']
+
+b = MP.groupby('Practice Area')[
+    'matter_cost_in_salary'].sum().reset_index()
+
+b['USD_collected_time'] = b['Practice Area'].map(a_dict)
+
+fig = px.bar(b, x='Practice Area', y=['matter_cost_in_salary', 'USD_collected_time'], title='TBA',
+             labels={'matter_cost_in_salary': 'Cost in Salary', 'Practice Area': 'Practice Area', 'USD_collected_time': 'Collected Time'})
+
+st.plotly_chart(fig, use_container_width=True)
+
+
 # Chart 1: Users' Hours by Practice Area
 grouped_data = MP.groupby(['Practice Area', 'User'])[
     'Quantity'].sum().reset_index()
@@ -187,37 +203,3 @@ fig = px.bar(cumulative_data, x='Month', y='Quantity',
 fig.update_layout(title='Hours Per Month')
 st.plotly_chart(fig, use_container_width=True)
 
-
-# Assuming new_RR and b are your dataframes
-
-# Chart One: Revenue by Practice Area
-fig = go.Figure()
-fig.add_trace(go.Bar(
-    x=new_RR['Practice Area'],
-    y=new_RR['USD_collected_time'],
-    name='Total Revenue',
-    marker=dict(color=px.colors.qualitative.G10)
-))
-
-# Chart Two: Users Salary Allocations by Practice Area
-# Adding bars with black outline
-fig.add_trace(go.Bar(
-    x=b['Practice Area'],
-    y=b['matter_cost_in_salary'],
-    name='Cost in Salary',
-    marker=dict(color='rgba(255, 255, 255, 0)',
-                line=dict(color='black', width=2)),
-    hovertext=b['User']
-))
-
-# Update the layout
-fig.update_layout(
-    title='Combined Revenue Analysis and Salary Allocations by Practice Area',
-    xaxis_title='Practice Area',
-    yaxis_title='Amount',
-    barmode='overlay'  # This ensures the bars are placed on top of each other
-)
-
-# Display the figure in Streamlit
-st.header("Revenue and Salary Allocations by Practice Area")
-st.plotly_chart(fig, use_container_width=True)
