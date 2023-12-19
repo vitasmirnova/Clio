@@ -31,7 +31,7 @@ if MP_csv is not None:
 
 
 # Creating Data Editor
-st.header('Data Editor')
+st.subheader('Data Editor (Revenue Report)')
 new_RR = st.data_editor(RR, num_rows='dynamic', hide_index=False)
 
 # Creating a button to save the edited DataFrame to a new CSV file
@@ -53,7 +53,7 @@ st.download_button(
 
 
 # Add separate Data Viewer to view data without editing it
-st.header('Data Viewer')
+st.subheader('Data Viewer (Revenue Report)')
 st.write(new_RR)
 
 # Charting data
@@ -61,7 +61,7 @@ st.header('Charts')
 
 # Chart 1: Revenue by Practice Area, MAIN
 
-st.header("Revenue by Practice Area")
+st.subheader("Revenue by Practice Area")
 fig = px.bar(new_RR, x='Practice Area', y='USD_collected_time',
              title='Revenue Analysis by Practice Area',
              labels={'USD_collected_time': 'Total Revenue',
@@ -72,7 +72,7 @@ fig = px.bar(new_RR, x='Practice Area', y='USD_collected_time',
 st.plotly_chart(fig, use_container_width=True)
 
 # Chart 2: Currency Distribution
-st.header("Currency Distribution")
+st.subheader("Currency Distribution")
 
 currency_distribution = new_RR.groupby(
     'Currency')['USD_collected_time'].sum().reset_index()
@@ -88,7 +88,7 @@ st.plotly_chart(fig, use_container_width=True)
 
 # Chart 3: Client's contribution to collected time
 
-st.header("Client's contribution to collected time")
+st.subheader("Client's contribution to collected time")
 
 #  title='Top 20% Clients Contribution to Revenue
 n = st.slider("Pick a %", 0, 100, value=20, step=5)/100
@@ -126,9 +126,7 @@ st.plotly_chart(fig, use_container_width=True)
 
 # Working with MP
 
-# Creating Data Editor
-st.header('Data Editor')
-MP = st.data_editor(MP, num_rows='dynamic', hide_index=False)
+
 
 # Users' Hours by Practice Area
 
@@ -144,6 +142,13 @@ MP['matter_prct_of_total_time'] = MP['Quantity'] / \
 MP['matter_cost_in_salary'] = MP['user_salary'] * \
     MP['matter_prct_of_total_time']
 
+# Creating Data Editor
+st.subheader('Data Editor (Matter Productivity by User)')
+MP = st.data_editor(MP, num_rows='dynamic', hide_index=False)
+
+st.subheader('Data Viewer (Matter Productivity by User)')
+st.write(MP)
+
 
 # Chart 0: Users Salary Allocations by Practice Area, MAIN
 b = MP.groupby(['Practice Area', 'User'])[
@@ -155,20 +160,64 @@ st.plotly_chart(fig, use_container_width=True)
 
 
 # Chart 0: Users Salary Allocations by Practice Area vs Collected Time, MAIN 2
-a = RR.groupby(['Practice Area'])['USD_collected_time'].sum()
+st.header('Margin Analysis')
+
+no_partners = st.checkbox ("Don't consider RB and EK salaries")
+
+
+
+if no_partners:
+    b = MP.copy()
+    b.loc[(b['User'] == 'Roman Buzko') | (b['User'] == 'Evgeny Krasnov'), 'matter_cost_in_salary'] = 0
+    b = b.groupby('Practice Area')[
+        'matter_cost_in_salary'].sum().reset_index()
+        
+else:
+
+    b = MP.groupby('Practice Area')[
+        'matter_cost_in_salary'].sum().reset_index()
+
+a = new_RR.groupby(['Practice Area'])['USD_collected_time'].sum()
 a = a.to_frame()
 a_dict = a.to_dict()['USD_collected_time']
 
-b = MP.groupby('Practice Area')[
-    'matter_cost_in_salary'].sum().reset_index()
 
 b['USD_collected_time'] = b['Practice Area'].map(a_dict)
 
-fig = px.bar(b, x='Practice Area', y=['matter_cost_in_salary', 'USD_collected_time'], title='TBA',
-             labels={'matter_cost_in_salary': 'Cost in Salary', 'Practice Area': 'Practice Area', 'USD_collected_time': 'Collected Time'})
+b['Margin, %'] = (b['USD_collected_time'] -
+                b['matter_cost_in_salary'])/b['USD_collected_time'] * 100
 
+
+
+
+# fig = px.bar(b, x='Practice Area', y=['matter_cost_in_salary', 'USD_collected_time'], title='TBA',
+#              labels={'matter_cost_in_salary': 'Cost in Salary', 'Practice Area': 'Practice Area', 'USD_collected_time': 'Collected Time'})
+
+# st.plotly_chart(fig, use_container_width=True)
+
+
+fig = go.Figure()
+fig.add_trace(go.Bar(
+    x=b['Practice Area'],
+    y=b['matter_cost_in_salary'],
+    name='Cost in Salary',
+    marker_color='red'
+))
+fig.add_trace(go.Bar(
+    x=b['Practice Area'],
+    y=b['USD_collected_time'],
+    name='Collected Time',
+    marker_color='rgb(26, 100, 255)'
+))
+
+
+# Here we modify the tickangle of the xaxis, resulting in rotated labels.
+fig.update_layout(barmode='group', title='Cost in Salary and Collected Time')
 st.plotly_chart(fig, use_container_width=True)
 
+st.write(b)
+
+st.subheader("Hours Analysis")
 
 # Chart 1: Users' Hours by Practice Area
 grouped_data = MP.groupby(['Practice Area', 'User'])[
@@ -202,4 +251,3 @@ fig = px.bar(cumulative_data, x='Month', y='Quantity',
              labels={'Quantity': 'Cumulative Hours'})
 fig.update_layout(title='Hours Per Month')
 st.plotly_chart(fig, use_container_width=True)
-
