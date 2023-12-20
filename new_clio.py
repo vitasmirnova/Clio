@@ -135,7 +135,17 @@ fig.update_layout(barmode='group', title='Cost in Salary and Collected Time')
 st.plotly_chart(fig, use_container_width=True)
 
 # Display the DataFrame
-st.write(b)
+
+formatted_b = b.copy()
+formatted_b['Margin, %'] = formatted_b['Margin, %'].map('{:.2f}%'.format)
+formatted_b['matter_cost_in_salary'] = formatted_b['matter_cost_in_salary'].map(
+    '{:,.1f}'.format).astype('str').str.replace(',', ' ')
+formatted_b['USD_collected_time'] = formatted_b['USD_collected_time'].map(
+    '{:,.1f}'.format).astype('str').str.replace(',', ' ')
+
+
+st.write(formatted_b)
+
 
 # Hours Analysis
 st.subheader("Hours Analysis")
