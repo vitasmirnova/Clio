@@ -8,3 +8,4 @@ clio_functions.py
 legacy.py
 *.csv
 .DS_Store
+v2
