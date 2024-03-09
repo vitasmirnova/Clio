@@ -10,3 +10,4 @@ legacy.py
 .DS_Store
 v2
 *.icloud
+freeze.txt
