@@ -9,3 +9,4 @@ legacy.py
 *.csv
 .DS_Store
 v2
+*.icloud
