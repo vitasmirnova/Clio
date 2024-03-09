@@ -99,7 +99,6 @@ def plot_metric(label, value, prefix="", suffix=""):
             },
         )
     )
-    return 0
 
     fig.update_xaxes(visible=False, fixedrange=True)
     fig.update_yaxes(visible=False, fixedrange=True)
@@ -112,7 +111,6 @@ def plot_metric(label, value, prefix="", suffix=""):
     )
 
     st.plotly_chart(fig, use_container_width=True)
-    return 0
 
 def create_margin_table(RR=RR, MP=MP):
     temp = RR.groupby(['Practice Area'], dropna=False)['USD Collected Time'].sum()
@@ -142,7 +140,6 @@ def plot_chart_salary_and_collected_time(margin_table):
     fig.update_layout(barmode='group', title='Cost in Salary and Collected Time by Practice',
                       legend=dict(y=1.1, orientation='h'))
     st.plotly_chart(fig, use_container_width=True)
-    return 0
 
 def show_margin_table(margin_table):
     st.write(' ')
@@ -158,7 +155,6 @@ def show_margin_table(margin_table):
         columns={'Matter Cost in Salary': 'Practice Cost in Salary'}, inplace = True)
     
     st.dataframe(margin_table, hide_index=True, use_container_width=True)
-    return 0
 
 def client_contribution(RR):
     st.write('')
@@ -177,7 +173,6 @@ def client_contribution(RR):
     fig = px.pie(grouped_data, names='Client', values='USD Collected Time',
                 title=f'Top {round(n*100)}% Clients Contribution to Revenue', hole=0.3)
     st.plotly_chart(fig, use_container_width=True)
-    return 0
 
 def hours_by_practice(MP):
     grouped_data = MP.groupby(['User', 'Practice Area'])[
@@ -185,7 +180,6 @@ def hours_by_practice(MP):
     fig = px.bar(grouped_data, x='Quantity', y='User', color='Practice Area', barmode='stack',
                 title="Users' Hours Allocation", labels={'Quantity': 'Hours', 'User' : ''}, height = 622)
     st.plotly_chart(fig, use_container_width=True)
-    return 0
 
 #######################################
 # GETTING DATA THAT IS USED LATER
