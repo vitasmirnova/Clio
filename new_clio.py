@@ -197,19 +197,19 @@ middle_left_line, middle_right_line = st.columns((2, 1.5), gap="medium")
 lower_left_line, lower_right_line = st.columns(2, gap = "medium")
 
 with top_left_line:
-    with st.container(border = True):
+    with st.container(border=True):
         plot_metric("Total Collected Time", total_collected_time,
                     prefix="", suffix=" USD")
 with top_right_line:
-    with st.container(border = True):
+    with st.container(border=True):
         plot_metric("Total Salaries", total_salaries, prefix="", suffix=" USD")
 
 with middle_left_line:
-    with st.container(border = True):
+    with st.container(border=True):
         plot_chart_salary_and_collected_time(mt)
 
 with middle_right_line:
-     with st.container(border = True):
+     with st.container(border=True):
         show_margin_table(mt)
 
 with lower_left_line:
@@ -217,5 +217,5 @@ with lower_left_line:
         client_contribution(RR)
 
 with lower_right_line:
-    with st.container(border = True):
+    with st.container(border=True):
         hours_by_practice(MP)
