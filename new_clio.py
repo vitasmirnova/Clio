@@ -20,12 +20,15 @@ st.set_page_config(
 st.title('Clio Reports Analyzer')
 
 # Function to convert DataFrame to CSV bytes
+
+
 def convert_df_to_csv_bytes(df):
     return df.to_csv(index=False).encode('utf-8')
 
 #######################################
 # DATA LOADING
 #######################################
+
 
 with st.expander('Data Upload'):
     RR_csv = st.file_uploader("Upload a CSV 'Revenue report'", type=["csv"])
@@ -50,21 +53,21 @@ with st.expander('Data Upload'):
         st.stop()
 
 with st.expander("Data Editor"):
-# Creating Data Editor for Revenue Report
+    # Creating Data Editor for Revenue Report
     st.subheader('Data Editor (Revenue Report)')
     new_RR = st.data_editor(RR, num_rows='dynamic', hide_index=False)
 
     # Creating a button to save the edited DataFrame to a new CSV file
     csv = convert_df_to_csv_bytes(new_RR)
     st.download_button("Press to download the edited CSV", csv,
-                    "RR_edited.csv", "text/csv", key='download-csv')
+                       "RR_edited.csv", "text/csv", key='download-csv')
 
-    #ТУТ НУЖНА ПЕРЕЗАПИСЬ MP Creating Data Editor for Matter Productivity by User
+    # ТУТ НУЖНА ПЕРЕЗАПИСЬ MP Creating Data Editor for Matter Productivity by User
     st.subheader('Data Editor (Matter Productivity by User)')
     MP = st.data_editor(MP, num_rows='dynamic', hide_index=False)
     csv2 = convert_df_to_csv_bytes(MP)
     st.download_button("Press to download the edited CSV", csv2,
-                    "MP_edited.csv", "text/csv", key='download-csv2')
+                       "MP_edited.csv", "text/csv", key='download-csv2')
 
 with st.expander("Data Viewer"):
     # Add separate Data Viewer to view data without editing it
@@ -76,6 +79,21 @@ with st.expander("Data Viewer"):
 
 
 st.title('Dashboard')
+
+#######################################
+# CURRENCY CONTROL
+#######################################
+
+ru_law_checkbox = st.checkbox('Russian Law')
+
+if ru_law_checkbox:
+    revenue_column = 'RUB Collected Time'
+    salary_column = 'RUB Matter Cost in Salary'
+    currency_label = ' RUB'
+else:
+    revenue_column = 'USD Collected Time'
+    salary_column = 'Matter Cost in Salary'
+    currency_label = ' USD'
 
 #######################################
 # VIZUALIZATION METHODS AND FUNCTIONS
@@ -112,49 +130,69 @@ def plot_metric(label, value, prefix="", suffix=""):
 
     st.plotly_chart(fig, use_container_width=True)
 
-def create_margin_table(RR=RR, MP=MP):
-    temp = RR.groupby(['Practice Area'], dropna=False)['USD Collected Time'].sum()
+
+def create_margin_table(RR, MP, revenue_column, salary_column):
+    temp = RR.groupby(['Practice Area'], dropna=False)[revenue_column].sum()
     temp = temp.to_frame()
-    temp_dict = temp.to_dict()['USD Collected Time']
+    temp_dict = temp.to_dict()[revenue_column]
 
     margin_table = MP.groupby(['Practice Area'], dropna=False)[
-        'Matter Cost in Salary'].sum().reset_index()
+        salary_column].sum().reset_index()
 
-    margin_table['USD Collected Time'] = margin_table['Practice Area'].map(temp_dict)
-    margin_table['Margin, %'] = (margin_table['USD Collected Time'] -
-                    margin_table['Matter Cost in Salary']) / margin_table['USD Collected Time'] * 100
+    margin_table[revenue_column] = margin_table['Practice Area'].map(temp_dict)
+    margin_table['Margin, %'] = (margin_table[revenue_column] -
+                                 margin_table[salary_column]) / margin_table[revenue_column] * 100
+
+    margin_table['x2 Salary'] = 2 * margin_table[salary_column]
+
+    margin_table['Delta of Revenue and x2 Salary'] = margin_table[revenue_column] - \
+        margin_table['x2 Salary']
+
     return margin_table
 
+
 def plot_chart_salary_and_collected_time(margin_table):
-    # st.write('Cost in Salary and Collected Time by Practice')
     # Create a bar chart from margin table
     fig = go.Figure()
-    fig.add_trace(go.Bar(x=margin_table['Practice Area'], 
-                         y=margin_table['Matter Cost in Salary'], 
-                         name='Cost in Salary', 
+    fig.add_trace(go.Bar(x=margin_table['Practice Area'],
+                         y=margin_table[salary_column],
+                         name=f'Cost in Salary,{currency_label}',
                          marker_color='red'))
-    fig.add_trace(go.Bar(x=margin_table['Practice Area'], 
-                         y=margin_table['USD Collected Time'],
-                         name='Collected Time', 
+    fig.add_trace(go.Bar(x=margin_table['Practice Area'],
+                         y=margin_table[revenue_column],
+                         name=f'Revenue,{currency_label}',
                          marker_color='rgb(26, 100, 255)'))
-    fig.update_layout(barmode='group', title='Cost in Salary and Collected Time by Practice',
+    fig.update_layout(barmode='group', title='Cost in Salary and Revenue by Practice',
                       legend=dict(y=1.1, orientation='h'))
     st.plotly_chart(fig, use_container_width=True)
+
 
 def show_margin_table(margin_table):
     st.write(' ')
     st.write(' ')
-    st.write('' )
+    st.write('')
 
-    margin_table['Margin, %'] = margin_table['Margin, %'].map('{:.2f}%'.format)
-    margin_table['Matter Cost in Salary'] = margin_table['Matter Cost in Salary'].map(
-        '{:,.0f}'.format).astype('str').str.replace(',', ' ')
-    margin_table['USD Collected Time'] = margin_table['USD Collected Time'].map(
-        '{:,.0f}'.format).astype('str').str.replace(',', ' ')
-    margin_table.rename(
-        columns={'Matter Cost in Salary': 'Practice Cost in Salary'}, inplace = True)
-    
-    st.dataframe(margin_table, hide_index=True, use_container_width=True)
+    # margin_table['Margin, %'] = margin_table['Margin, %']
+    # margin_table[salary_column] = margin_table[salary_column]
+    # margin_table[revenue_column] = margin_table[revenue_column]
+    # margin_table['x2 Salary'] = margin_table['x2 Salary']
+    # margin_table['Delta of Revenue and x2 Salary'] = margin_table['Delta of Revenue and x2 Salary']
+
+# не получается пока формат как я хочу
+    format_config = {
+        'Margin, %': st.column_config.NumberColumn(format="%.2f"),
+        salary_column: st.column_config.NumberColumn(label = f'Practice Cost in Salary,{currency_label}', format="%.0f"),
+        revenue_column: st.column_config.NumberColumn(label=f'Revenue,{currency_label}', format="%.0f"),
+        'x2 Salary': st.column_config.NumberColumn(format="%.0f"),
+        'Delta of Revenue and x2 Salary': st.column_config.NumberColumn(format="%.0f")
+    }
+
+    # margin_table.rename(
+    #     columns={revenue_column: f'Revenue,{currency_label}'}, inplace=True)
+
+    st.dataframe(margin_table, hide_index=True,
+                 use_container_width=True, column_config=format_config)
+
 
 def client_contribution(RR):
     st.write('')
@@ -162,54 +200,57 @@ def client_contribution(RR):
     st.markdown("**Client's contribution to collected time**")
     n = st.slider("Pick a %", 0, 100, value=20, step=5)/100
     client_contribution = RR.groupby(
-        'Client')['USD Collected Time'].sum().reset_index()
+        'Client')[revenue_column].sum().reset_index()
     top_clients = client_contribution.sort_values(
-        'USD Collected Time', ascending=False).head(int(len(client_contribution) * n))
+        revenue_column, ascending=False).head(int(len(client_contribution) * n))
     other_clients = client_contribution[~client_contribution['Client'].isin(
         top_clients['Client'])]
-    other_clients = pd.DataFrame({'Client': ['Other'], 'USD Collected Time': [
-        other_clients['USD Collected Time'].sum()]},)
+    other_clients = pd.DataFrame({'Client': ['Other'], revenue_column: [
+        other_clients[revenue_column].sum()]},)
     grouped_data = pd.concat([top_clients, other_clients])
-    fig = px.pie(grouped_data, names='Client', values='USD Collected Time',
-                title=f'Top {round(n*100)}% Clients Contribution to Revenue', hole=0.3)
+    fig = px.pie(grouped_data, names='Client', values=revenue_column,
+                 title=f'Top {round(n*100)}% Clients Contribution to Revenue', hole=0.3)
     st.plotly_chart(fig, use_container_width=True)
+
 
 def hours_by_practice(MP):
     grouped_data = MP.groupby(['User', 'Practice Area'])[
         'Quantity'].sum().reset_index()
     fig = px.bar(grouped_data, x='Quantity', y='User', color='Practice Area', barmode='stack',
-                title="Users' Hours Allocation", labels={'Quantity': 'Hours', 'User' : ''}, height = 622)
+                 title="Users' Hours Allocation", labels={'Quantity': 'Hours', 'User': ''}, height=622)
     st.plotly_chart(fig, use_container_width=True)
 
 #######################################
 # GETTING DATA THAT IS USED LATER
 #######################################
-    
-mt = create_margin_table(RR=RR, MP=MP)
-total_collected_time = mt['USD Collected Time'].sum()
-total_salaries = mt['Matter Cost in Salary'].sum()
+
+mt = create_margin_table(RR, MP, revenue_column, salary_column)
+total_collected_time = mt[revenue_column].sum()
+total_salaries = mt[salary_column].sum()
 
 #######################################
 # STREAMLIT LAYOUT AND PLOTTING
 #######################################
 top_left_line, top_right_line = st.columns((2, 2))
-middle_left_line, middle_right_line = st.columns((2, 1.5), gap="medium")
-lower_left_line, lower_right_line = st.columns(2, gap = "medium")
+middle_left_line, middle_right_line = st.columns((1.8, 1.5), gap="medium")
+lower_left_line, lower_right_line = st.columns(2, gap="medium")
 
 with top_left_line:
     with st.container(border=True):
-        plot_metric("Total Collected Time", total_collected_time,
-                    prefix="", suffix=" USD")
+        plot_metric("Revenue", total_collected_time,
+                    prefix="", suffix=currency_label)
+
 with top_right_line:
     with st.container(border=True):
-        plot_metric("Total Salaries", total_salaries, prefix="", suffix=" USD")
+        plot_metric("Total Salaries", total_salaries,
+                    prefix="", suffix=currency_label)
 
 with middle_left_line:
     with st.container(border=True):
         plot_chart_salary_and_collected_time(mt)
 
 with middle_right_line:
-     with st.container(border=True):
+    with st.container(border=True):
         show_margin_table(mt)
 
 with lower_left_line:
