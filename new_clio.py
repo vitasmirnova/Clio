@@ -84,7 +84,7 @@ st.title('Dashboard')
 # CURRENCY CONTROL
 #######################################
 
-ru_law_checkbox = st.checkbox('Russian Law')
+ru_law_checkbox = st.checkbox('Russian Law', value=False)
 
 if ru_law_checkbox:
     revenue_column = 'RUB Collected Time'
@@ -98,6 +98,7 @@ else:
 #######################################
 # VIZUALIZATION METHODS AND FUNCTIONS
 #######################################
+
 
 def plot_metric(label, value, prefix="", suffix=""):
     fig = go.Figure()
@@ -155,8 +156,8 @@ def plot_chart_salary_and_collected_time(margin_table):
     # Create a bar chart from margin table
     fig = go.Figure()
     fig.add_trace(go.Bar(x=margin_table['Practice Area'],
-                         y=margin_table[salary_column],
-                         name=f'Cost in Salary,{currency_label}',
+                         y=margin_table[salary_column] * 2,
+                         name=f'2x Cost in Salary,{currency_label}',
                          marker_color='red'))
     fig.add_trace(go.Bar(x=margin_table['Practice Area'],
                          y=margin_table[revenue_column],
@@ -181,7 +182,7 @@ def show_margin_table(margin_table):
 # не получается пока формат как я хочу
     format_config = {
         'Margin, %': st.column_config.NumberColumn(format="%.2f"),
-        salary_column: st.column_config.NumberColumn(label = f'Practice Cost in Salary,{currency_label}', format="%.0f"),
+        salary_column: st.column_config.NumberColumn(label=f'Practice Cost in Salary,{currency_label}', format="%.0f"),
         revenue_column: st.column_config.NumberColumn(label=f'Revenue,{currency_label}', format="%.0f"),
         'x2 Salary': st.column_config.NumberColumn(format="%.0f"),
         'Delta of Revenue and x2 Salary': st.column_config.NumberColumn(format="%.0f")
@@ -220,11 +221,15 @@ def hours_by_practice(MP):
                  title="Users' Hours Allocation", labels={'Quantity': 'Hours', 'User': ''}, height=622)
     st.plotly_chart(fig, use_container_width=True)
 
+
 #######################################
 # GETTING DATA THAT IS USED LATER
 #######################################
-
-mt = create_margin_table(RR, MP, revenue_column, salary_column)
+try:
+    mt = create_margin_table(RR, MP, revenue_column, salary_column)
+except:
+    st.info('Unselect the checkbox', icon='ℹ️')
+    st.stop()
 total_collected_time = mt[revenue_column].sum()
 total_salaries = mt[salary_column].sum()
 
