@@ -7,6 +7,7 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 import plotly.graph_objs as go
+from google.cloud import storage
 
 #######################################
 # PAGE SETUP
@@ -32,8 +33,24 @@ conn = st.connection('gcs', type=FilesConnection)
 # PERIOD SPECIFICATION
 #######################################
 
-periods = ['Q124', 'Q224']
-chosen_period = st.selectbox("Select period:", periods)
+
+folder_path = "clio-reports"
+
+# Access the FileSystem object API
+fs = conn.fs
+
+# List all files within the folder
+period_folders_list = fs.ls(folder_path)
+
+# st.write(period_folders_list)
+
+# Get rid of the bucket path
+periods_list = []
+for folder in period_folders_list:
+    periods_list.append(folder.split('/')[1])
+# st.write(periods_list)
+
+chosen_period = st.selectbox("Select period:", periods_list)
 
 #######################################
 # DATA LOADING (CLOUD VERSION)
@@ -42,9 +59,9 @@ chosen_period = st.selectbox("Select period:", periods)
 # Specify input format is a csv and to cache the result for 600 seconds.
 
 MP = conn.read(
-    f"clio-reports/MP_{chosen_period}.csv", input_format="csv", ttl=600)
+    f"clio-reports/{chosen_period}/MP_{chosen_period}.csv", input_format="csv", ttl=600)
 RR = conn.read(
-    f"clio-reports/RR_{chosen_period}.csv", input_format="csv", ttl=600)
+    f"clio-reports/{chosen_period}/RR_{chosen_period}.csv", input_format="csv", ttl=600)
 
 #######################################
 # DATA LOADING (UPLOAD VERSION) -- OLD
@@ -109,16 +126,20 @@ st.title('Dashboard')
 # CURRENCY CONTROL
 #######################################
 
-ru_law_checkbox = st.checkbox('Russian Law', value=False)
+# ru_law_checkbox = st.checkbox('Russian Law', value=False)
 
-if ru_law_checkbox:
-    revenue_column = 'RUB Collected Time'
-    salary_column = 'RUB Matter Cost in Salary'
-    currency_label = ' RUB'
-else:
-    revenue_column = 'USD Collected Time'
-    salary_column = 'Matter Cost in Salary'
-    currency_label = ' USD'
+# if ru_law_checkbox:
+#     revenue_column = 'RUB Collected Time'
+#     salary_column = 'RUB Matter Cost in Salary'
+#     currency_label = ' RUB'
+# else:
+#     revenue_column = 'USD Collected Time'
+#     salary_column = 'Matter Cost in Salary'
+#     currency_label = ' USD'
+
+revenue_column = 'USD Collected Time'
+salary_column = 'Matter Cost in Salary'
+currency_label = ' USD'
 
 #######################################
 # VIZUALIZATION METHODS AND FUNCTIONS
