@@ -2,6 +2,7 @@
 Run with `streamlit run new_clio.py`
 """
 
+from st_files_connection import FilesConnection
 import pandas as pd
 import streamlit as st
 import plotly.express as px
@@ -21,36 +22,60 @@ st.title('Clio Reports Analyzer')
 
 # Function to convert DataFrame to CSV bytes
 
-
 def convert_df_to_csv_bytes(df):
     return df.to_csv(index=False).encode('utf-8')
 
+# Create connection object and retrieve file contents.
+conn = st.connection('gcs', type=FilesConnection)
+
 #######################################
-# DATA LOADING
+# PERIOD SPECIFICATION
 #######################################
 
+periods = ['Q124', 'Q224']
+chosen_period = st.selectbox("Select period:", periods)
 
-with st.expander('Data Upload'):
-    RR_csv = st.file_uploader("Upload a CSV 'Revenue report'", type=["csv"])
-    if RR_csv is not None:
-        st.success("File uploaded successfully!")
-        # Read the uploaded CSV file into a DataFrame
-        RR = pd.read_csv(RR_csv)
-    else:
-        st.info('Upload a file', icon='ℹ️')
-        st.stop()
+#######################################
+# DATA LOADING (CLOUD VERSION)
+#######################################
 
-    # Uploading Matter Productivity By User
-    MP_csv = st.file_uploader(
-        "Upload a CSV 'Matter Productivity By User'", type=["csv"])
-    if MP_csv is not None:
-        st.success("File uploaded successfully!")
+# Specify input format is a csv and to cache the result for 600 seconds.
 
-        # Read the uploaded CSV file into a DataFrame
-        MP = pd.read_csv(MP_csv)
-    else:
-        st.info('Upload a file', icon='ℹ️')
-        st.stop()
+MP = conn.read(
+    f"clio-reports/MP_{chosen_period}.csv", input_format="csv", ttl=600)
+RR = conn.read(
+    f"clio-reports/RR_{chosen_period}.csv", input_format="csv", ttl=600)
+
+#######################################
+# DATA LOADING (UPLOAD VERSION) -- OLD
+#######################################
+
+# with st.expander('Data Upload'):
+#     RR_csv = st.file_uploader("Upload a CSV 'Revenue report'", type=["csv"])
+#     if RR_csv is not None:
+#         st.success("File uploaded successfully!")
+#         # Read the uploaded CSV file into a DataFrame
+#         RR = pd.read_csv(RR_csv)
+#     else:
+#         st.info('Upload a file', icon='ℹ️')
+#         st.stop()
+
+#     # Uploading Matter Productivity By User
+#     MP_csv = st.file_uploader(
+#         "Upload a CSV 'Matter Productivity By User'", type=["csv"])
+#     if MP_csv is not None:
+#         st.success("File uploaded successfully!")
+
+#         # Read the uploaded CSV file into a DataFrame
+#         MP = pd.read_csv(MP_csv)
+#     else:
+#         st.info('Upload a file', icon='ℹ️')
+#         st.stop()
+
+#######################################
+# DATA VIEWING
+#######################################
+
 
 with st.expander("Data Editor"):
     # Creating Data Editor for Revenue Report
