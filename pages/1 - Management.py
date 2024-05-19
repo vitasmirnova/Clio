@@ -1,17 +1,16 @@
 """
-Run with `streamlit run new_clio.py`
+When a new practice report is being coded, it is neccessary to modify the first three sections in this file
 """
 
 from st_files_connection import FilesConnection
-# import pandas as pd
 import streamlit as st
-# import plotly.express as px
-# import plotly.graph_objs as go
 from custom_functions import *
 
 #######################################
-# PAGE SETUP AND AUTHENTICATION
+# PAGE SETUP
 #######################################
+
+# !! This section is modified for every practice
 
 st.set_page_config(
     page_title='BK reporting',
@@ -22,32 +21,44 @@ st.set_page_config(
 st.title('Clio Reports Analyzer')
 st.subheader('Management report')
 
+#######################################
+# AUTHENTIFICATION
+#######################################
+
+# !! This section is modified for every practice
+
 page_allowed_emails = st.secrets["management_emails"]
 
-# Debugging
+# Debugging lines
 # st.write(st.experimental_user.email)
 # st.write(page_allowed_emails)
 
-authenticate(st.experimental_user.email, page_allowed_emails) # stops the app if the email is not in the allowed list
+authenticate(st.experimental_user.email, page_allowed_emails) # Stops the app if the email is not in the allowed list
 
 # Create connection object and retrieve file contents.
 conn = st.connection('gcs', type=FilesConnection)
 
 #######################################
-# PERIOD SPECIFICATION
+# PRACTICE FOLDER PATH, CURRENCY
 #######################################
+
+# !! This section is modified for every practice
 
 folder_path = "clio-reports"
 
+revenue_column = 'USD Collected Time'
+salary_column = 'Matter Cost in Salary'
+currency_label = ' USD'
+
+#######################################
+# PERIOD AND DATA LOADING FROM CLOUD
+#######################################
+
+# Get the desired period
 periods_list = create_periods_list(conn, folder_path)
 chosen_period = st.selectbox("Select period:", periods_list)
 
-#######################################
-# DATA LOADING (CLOUD VERSION)
-#######################################
-
-# Specify input format is a csv and to cache the result for 600 seconds.
-
+# Load data from the cloud
 MP = conn.read(
     f"clio-reports/{chosen_period}/MP_{chosen_period}.csv", input_format="csv", ttl=600)
 RR = conn.read(
@@ -65,36 +76,16 @@ with st.expander("Data Viewer"):
     st.subheader('Data Viewer (Matter Productivity by User)')
     st.write(MP)
 
-
 st.title('Dashboard')
-
-#######################################
-# CURRENCY CONTROL
-#######################################
-
-# ru_law_checkbox = st.checkbox('Russian Law', value=False)
-
-# if ru_law_checkbox:
-#     revenue_column = 'RUB Collected Time'
-#     salary_column = 'RUB Matter Cost in Salary'
-#     currency_label = ' RUB'
-# else:
-#     revenue_column = 'USD Collected Time'
-#     salary_column = 'Matter Cost in Salary'
-#     currency_label = ' USD'
-
-revenue_column = 'USD Collected Time'
-salary_column = 'Matter Cost in Salary'
-currency_label = ' USD'
-
 
 #######################################
 # GETTING DATA THAT IS USED LATER
 #######################################
+
 try:
     mt = create_margin_table(RR, MP, revenue_column, salary_column)
 except:
-    st.info('Unselect the checkbox', icon='ℹ️')
+    st.info('Something went wrong (MT)', icon='ℹ️')
     st.stop()
 total_collected_time = mt[revenue_column].sum()
 total_salaries = mt[salary_column].sum()
@@ -102,6 +93,7 @@ total_salaries = mt[salary_column].sum()
 #######################################
 # STREAMLIT LAYOUT AND PLOTTING
 #######################################
+
 top_left_line, top_right_line = st.columns((2, 2))
 middle_left_line, middle_right_line = st.columns((1.8, 1.5), gap="medium")
 lower_left_line, lower_right_line = st.columns(2, gap="medium")
