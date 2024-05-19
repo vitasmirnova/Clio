@@ -44,7 +44,7 @@ conn = st.connection('gcs', type=FilesConnection)
 
 # !! This section is modified for every practice
 
-folder_path = "clio-reports"
+folder_path = "clio-reports/management"
 
 revenue_column = 'USD Collected Time'
 salary_column = 'Matter Cost in Salary'
