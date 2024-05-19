@@ -59,10 +59,12 @@ periods_list = create_periods_list(conn, folder_path)
 chosen_period = st.selectbox("Select period:", periods_list)
 
 # Load data from the cloud
+# st.write(f"{folder_path}/{chosen_period}/MP_{chosen_period}.csv") debug line
+
 MP = conn.read(
-    f"clio-reports/{chosen_period}/MP_{chosen_period}.csv", input_format="csv", ttl=600)
+    f"{folder_path}/{chosen_period}/MP_{chosen_period}.csv", input_format="csv", ttl=600)
 RR = conn.read(
-    f"clio-reports/{chosen_period}/RR_{chosen_period}.csv", input_format="csv", ttl=600)
+    f"{folder_path}/{chosen_period}/RR_{chosen_period}.csv", input_format="csv", ttl=600)
 
 #######################################
 # DATA VIEWING

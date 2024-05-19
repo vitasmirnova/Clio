@@ -59,9 +59,9 @@ chosen_period = st.selectbox("Select period:", periods_list)
 
 # Load data from the cloud
 MP = conn.read(
-    f"clio-reports/{chosen_period}/MP_{chosen_period}.csv", input_format="csv", ttl=600)
+    f"{folder_path}/{chosen_period}/MP_{chosen_period}.csv", input_format="csv", ttl=600)
 RR = conn.read(
-    f"clio-reports/{chosen_period}/RR_{chosen_period}.csv", input_format="csv", ttl=600)
+    f"{folder_path}/{chosen_period}/RR_{chosen_period}.csv", input_format="csv", ttl=600)
 
 #######################################
 # DATA VIEWING

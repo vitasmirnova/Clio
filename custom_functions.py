@@ -21,12 +21,13 @@ def authenticate(user_email, allowed_emails):
 
 def create_periods_list(conn, path):
     fs = conn.fs
-    period_folders_list = fs.ls(path)
+    period_folders_list = fs.ls(path)[1:]
+    # st.write(period_folders_list) debug line
 
     periods_list = []
 
     for folder in period_folders_list:
-        periods_list.append(folder.split('/')[1])
+        periods_list.append(folder.split('/')[2])
 
     return periods_list
 
