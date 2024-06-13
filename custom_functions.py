@@ -131,11 +131,40 @@ def show_margin_table(margin_table, salary_column, revenue_column, currency_labe
                  use_container_width=True, column_config=format_config)
 
 
+# def client_contribution(RR, revenue_column):
+#     st.write('')
+#     st.write('')
+#     st.markdown("**Client's contribution to collected time**")
+#     n = st.slider("Pick a %", 0, 100, value=20, step=5)/100
+#     client_contribution = RR.groupby(
+#         'Client')[revenue_column].sum().reset_index()
+#     top_clients = client_contribution.sort_values(
+#         revenue_column, ascending=False).head(int(len(client_contribution) * n))
+#     other_clients = client_contribution[~client_contribution['Client'].isin(
+#         top_clients['Client'])]
+#     other_clients = pd.DataFrame({'Client': ['Other'], revenue_column: [
+#         other_clients[revenue_column].sum()]},)
+#     grouped_data = pd.concat([top_clients, other_clients])
+#     fig = px.pie(grouped_data, names='Client', values=revenue_column,
+#                  title=f'Top {round(n*100)}% Clients Contribution to Revenue', hole=0.3)
+#     st.plotly_chart(fig, use_container_width=True)
+
 def client_contribution(RR, revenue_column):
     st.write('')
     st.write('')
     st.markdown("**Client's contribution to collected time**")
-    n = st.slider("Pick a %", 0, 100, value=20, step=5)/100
+
+    # Add a dropdown to filter by Practice Area
+    practice_areas = RR['Practice Area'].unique().tolist()
+    practice_area = st.selectbox("Select Practice Area", [
+                                 "All"] + practice_areas)
+
+    # Filter the data based on the selected Practice Area
+    if practice_area != "All":
+        RR = RR[RR['Practice Area'] == practice_area]
+
+    n = st.slider("Pick a %", 0, 100, value=20, step=5) / 100
+
     client_contribution = RR.groupby(
         'Client')[revenue_column].sum().reset_index()
     top_clients = client_contribution.sort_values(
@@ -143,10 +172,11 @@ def client_contribution(RR, revenue_column):
     other_clients = client_contribution[~client_contribution['Client'].isin(
         top_clients['Client'])]
     other_clients = pd.DataFrame({'Client': ['Other'], revenue_column: [
-        other_clients[revenue_column].sum()]},)
+                                 other_clients[revenue_column].sum()]})
     grouped_data = pd.concat([top_clients, other_clients])
+
     fig = px.pie(grouped_data, names='Client', values=revenue_column,
-                 title=f'Top {round(n*100)}% Clients Contribution to Revenue', hole=0.3)
+                 title=f'Top {round(n*100)}% Clients Contribution to Revenue ({practice_area})', hole=0.3)
     st.plotly_chart(fig, use_container_width=True)
 
 
