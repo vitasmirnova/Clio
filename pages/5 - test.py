@@ -52,21 +52,16 @@ revenue_column = 'USD Collected Time'
 salary_column = 'Matter Cost in Salary'
 currency_label = ' USD'
 
+folder_path = "clio-reports/management"
+dynamic_folder_path = "clio-reports/dynamic"
+dynamic_file_name = 'dynamic_data.pkl'
+
 #######################################
 # PERIOD AND DATA LOADING FROM CLOUD
 #######################################
 
 # Get all the periods
 periods_list = create_periods_list(conn, folder_path)
-
-
-# как сделать динамику? надо по каждому периоду взять марджин тейбл. как ее хранить / генерить заранее может? и добавлять файл в облако? использовать кэш?
-# попробую сейчас просто для двух периодов получить только таблички
-
-# калькулируем таблички проходясь по каждому периоду. Оформляем общий динамичный фрейм (как?). Это все делается по нажатию кнопки рефреш. Если кнопку не жали, файл просто грузтся. 
-# Если ошибка, рефреш идет автоматом.
-
-
 
 try:
     # Attempt to read Pickle data from GCS

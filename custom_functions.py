@@ -121,11 +121,6 @@ def pkl_to_two_dfs(pkl_file):
 
     return combined_df, main_stats_df
 
-
-folder_path = "clio-reports/management"
-dynamic_folder_path = "clio-reports/dynamic"
-dynamic_file_name = 'dynamic_data.pkl'
-
 #######################################
 # VIZUALIZATION METHODS AND FUNCTIONS
 #######################################
