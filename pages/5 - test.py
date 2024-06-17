@@ -19,8 +19,8 @@ st.set_page_config(
 )
 
 # Setting a title
-st.title('Clio Reports Analyzer')
-st.subheader('Management report')
+st.title('Clio Reports')
+st.subheader('Management report (Dynamic data)')
 
 #######################################
 # AUTHENTIFICATION
@@ -67,84 +67,33 @@ periods_list = create_periods_list(conn, folder_path)
 # Если ошибка, рефреш идет автоматом.
 
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
 
-# retrieved_data = {}
+try:
+    # Attempt to read Pickle data from GCS
+    with conn.fs.open(f"{dynamic_folder_path}/{dynamic_file_name}", 'rb') as f:
+        pkl_data = pickle.load(f)
+    # If successful, display success message
+    # st.success('Data retrieved from dynamic cloud')
 
-# for period in periods_list:
-#     try:
-#         MP = conn.read(
-#             f"{folder_path}/{period}/MP_{period}.csv", input_format="csv", ttl=600)
-#         RR = conn.read(
-#             f"{folder_path}/{period}/RR_{period}.csv", input_format="csv", ttl=600)
-#     except Exception as e:
-#         st.info(
-#             f'Something went wrong while reading data for period {period}: {e}', icon='ℹ️')
-#         logging.error(f"Error reading data for period {period}: {e}")
-#         continue  # Skip this period and continue with the next one
+except Exception as e:
+    # If there's an exception (e.g., file not found, connection issue), handle it
+    st.error(f'Error retrieving data: {e}')
+    # Optionally, log the error for further investigation
+    logging.error(f"Error retrieving data from GCS: {e}")
 
-#     try:
-#         mt = create_margin_table(RR, MP, revenue_column, salary_column)
-#     except Exception as e:
-#         st.info(
-#             f'Something went wrong (MT) for period {period}: {e}', icon='ℹ️')
-#         logging.error(f"Error creating margin table for period {period}: {e}")
-#         continue  # Skip this period and continue with the next one
-
-#     total_collected_time = mt[revenue_column].sum()
-#     total_salaries = mt[salary_column].sum()
-
-#     # plot_chart_salary_and_collected_time(
-#     #     mt, salary_column, revenue_column, currency_label)
-
-#     # Ensure the dictionary for this period is initialized
-#     retrieved_data[period] = {}
-#     retrieved_data[period]['margin_table'] = mt
-#     retrieved_data[period]['total_salaries'] = total_salaries
-#     retrieved_data[period]['total_collected_time'] = total_collected_time
-
-# retrieved_data
-
-
-def retrieve_data(periods_list, folder_path, conn, revenue_column, salary_column):
-    retrieved_data = {}
-
-    for period in periods_list:
-        try:
-            MP = conn.read(
-                f"{folder_path}/{period}/MP_{period}.csv", input_format="csv", ttl=600)
-            RR = conn.read(
-                f"{folder_path}/{period}/RR_{period}.csv", input_format="csv", ttl=600)
-        except Exception as e:
-            st.info(
-                f'Something went wrong while reading data for period {period}: {e}', icon='ℹ️')
-            logging.error(f"Error reading data for period {period}: {e}")
-            continue  # Skip this period and continue with the next one
-
-        try:
-            mt = create_margin_table(RR, MP, revenue_column, salary_column)
-        except Exception as e:
-            st.info(
-                f'Something went wrong (MT) for period {period}: {e}', icon='ℹ️')
-            logging.error(
-                f"Error creating margin table for period {period}: {e}")
-            continue  # Skip this period and continue with the next one
-
-        total_collected_time = mt[revenue_column].sum()
-        total_salaries = mt[salary_column].sum()
-
-        # Ensure the dictionary for this period is initialized
-        retrieved_data[period] = {}
-        retrieved_data[period]['margin_table'] = mt
-        retrieved_data[period]['total_salaries'] = total_salaries
-        retrieved_data[period]['total_collected_time'] = total_collected_time
-
-    return retrieved_data
+    # If not found, then the data is retrieved and written to the cloud
+    logging.error(
+        f"File with dynamic data is not found. Initiating data retrieval")
+    plk_data = refresh_and_upload_data(periods_list, folder_path, revenue_column,
+             salary_column, dynamic_folder_path, dynamic_file_name, conn)
 
 if st.button('Refresh Data'):
-    retrieved_data = retrieve_data(
-        periods_list, folder_path, conn, revenue_column, salary_column)
-    st.success("Data refreshed successfully!")
+    plk_data = refresh_and_upload_data(periods_list, folder_path, revenue_column,
+                 salary_column, dynamic_folder_path, dynamic_file_name, conn)
 
-retrieved_data
+a, b = pkl_to_two_dfs(pkl_data)
+st.write(a, b)
+
+
+
+

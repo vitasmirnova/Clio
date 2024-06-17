@@ -3,6 +3,8 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objs as go
 import pandas as pd
+import pickle
+import logging
 
 #######################################
 # PAGE CONFIGURATION FUNCTIONS
@@ -30,6 +32,99 @@ def create_periods_list(conn, path):
         periods_list.append(folder.split('/')[2])
 
     return periods_list
+
+
+#######################################
+# DYNAMIC REPORT DATA HANDLING
+#######################################
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+
+# This function returns a pkl file, which it forms from the data from the main folder
+def retrieve_pkl_data(periods_list, folder_path, conn, revenue_column, salary_column):
+    pkl_data = {}
+
+    for period in periods_list:
+        try:
+            MP = conn.read(
+                f"{folder_path}/{period}/MP_{period}.csv", input_format="csv", ttl=600)
+            RR = conn.read(
+                f"{folder_path}/{period}/RR_{period}.csv", input_format="csv", ttl=600)
+        except Exception as e:
+            st.info(
+                f'Something went wrong while reading data for period {period}: {e}', icon='ℹ️')
+            logging.error(f"Error reading data for period {period}: {e}")
+            continue  # Skip this period and continue with the next one
+
+        try:
+            mt = create_margin_table(RR, MP, revenue_column, salary_column)
+        except Exception as e:
+            st.info(
+                f'Something went wrong (MT) for period {period}: {e}', icon='ℹ️')
+            logging.error(
+                f"Error creating margin table for period {period}: {e}")
+            continue  # Skip this period and continue with the next one
+
+        total_collected_time = mt[revenue_column].sum()
+        total_salaries = mt[salary_column].sum()
+
+        # Ensure the dictionary for this period is initialized
+        pkl_data[period] = {}
+        pkl_data[period]['margin_table'] = mt
+        pkl_data[period]['total_salaries'] = total_salaries
+        pkl_data[period]['total_collected_time'] = total_collected_time
+
+    # Convert to pkl
+    pkl_data = pickle.dumps(pkl_data)
+    return pkl_data
+
+# This function writes pkl file to gsm
+def write_pkl_to_gcs(pkl_data, folder_path, file_name, conn):
+    # Write PKL to GCS using the Streamlit connection
+    with conn.fs.open(f"{folder_path}/{file_name}", 'wb') as f:
+        f.write(pkl_data)
+    # st.success(
+    #     f'File successfully written to gs://{folder_path}/{file_name}')
+
+# This function uses previous functions to a) retrieve data from main cloud and b) upload it, replacing the existing file
+# Returns pkl file
+def refresh_and_upload_data(periods_list, folder_path, revenue_column, salary_column, dynamic_folder_path, dynamic_file_name, conn):
+    pkl_data = retrieve_pkl_data(
+        periods_list, folder_path, conn, revenue_column, salary_column)
+    write_pkl_to_gcs(
+        pkl_data, dynamic_folder_path, dynamic_file_name, conn)
+    # st.success("Data refreshed and uploaded successfully!")
+    return pkl_data
+
+# Forms two dfs from the pkl file
+
+
+def pkl_to_two_dfs(pkl_file):
+    combined_df_list = []
+    main_stats_df_list = []
+
+    for key in pkl_file:
+        # First df (all the info)
+        margin_table = pkl_file[key]['margin_table'].copy()
+        margin_table['Quarter'] = key
+        combined_df_list.append(margin_table)
+
+        # Second df (main stats)
+        main_stats_row = {'quarter': key,
+                          'total_salaries': pkl_file[key]['total_salaries'],
+                          'total_collected_time': pkl_file[key]['total_collected_time']}
+        main_stats_df_list.append(main_stats_row)
+
+    combined_df = pd.concat(combined_df_list, ignore_index=True)
+    main_stats_df = pd.DataFrame(main_stats_df_list)
+
+    return combined_df, main_stats_df
+
+
+folder_path = "clio-reports/management"
+dynamic_folder_path = "clio-reports/dynamic"
+dynamic_file_name = 'dynamic_data.pkl'
 
 #######################################
 # VIZUALIZATION METHODS AND FUNCTIONS
@@ -186,3 +281,4 @@ def hours_by_practice(MP):
     fig = px.bar(grouped_data, x='Quantity', y='User', color='Practice Area', barmode='stack',
                  title="Users' Hours Allocation", labels={'Quantity': 'Hours', 'User': ''}, height=622)
     st.plotly_chart(fig, use_container_width=True)
+
