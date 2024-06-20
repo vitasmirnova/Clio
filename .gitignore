@@ -12,3 +12,4 @@ v2
 *.icloud
 freeze.txt
 .streamlit/secrets.toml
+.DS_Store

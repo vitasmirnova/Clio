@@ -67,13 +67,31 @@ RR = conn.read(
 # DATA VIEWING
 #######################################
 
+
 with st.expander("Data Viewer"):
+
+    simple_view = st.checkbox('Simple View')
+
     # Add separate Data Viewer to view data without editing it
     st.subheader('Data Viewer (Revenue Report)')
-    st.write(RR)  # было new_RR когда было с Editor
+    if simple_view:
+        st.write(RR[['Client', 'Matter Number',
+                 'Matter Description', revenue_column, 'Currency']])
+    else:
+        st.write(RR)
 
     st.subheader('Data Viewer (Matter Productivity by User)')
-    st.write(MP)
+    if simple_view:
+        st.write(MP[['User', 'Matter Number', 'Date', 'Quantity', salary_column]])
+    else:
+        st.write(MP)
+
+with st.expander("Settings"):
+    damen_counted = st.checkbox('Учитывать DESP Sale', value=True)
+    if damen_counted:
+        pass
+    else:
+        RR = RR[RR['Client'] != 'Damen Global Support B.V.']
 
 st.title('Dashboard')
 
