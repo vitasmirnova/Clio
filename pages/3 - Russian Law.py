@@ -76,7 +76,7 @@ with st.expander("Data Viewer"):
     st.subheader('Data Viewer (Revenue Report)')
     if simple_view:
         st.write(RR[['Client', 'Matter Number',
-                 'Matter Description', revenue_column, 'Currency']])
+                 'Matter Description', revenue_column, 'Currency', 'Collected Time']])
     else:
         st.write(RR)
 
