@@ -16,7 +16,7 @@ st.set_page_config(
 
 # Setting a title
 st.title('Clio Reports Analyzer')
-st.subheader('Russian Law practice report')
+st.subheader('Russian Law')
 
 #######################################
 # AUTHENTIFICATION
