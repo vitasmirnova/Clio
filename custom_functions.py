@@ -1,4 +1,5 @@
 
+import plotly.graph_objects as go
 import streamlit as st
 import plotly.express as px
 import plotly.graph_objs as go
@@ -183,13 +184,13 @@ def plot_chart_salary_and_collected_time(margin_table, salary_column, revenue_co
     fig = go.Figure()
     fig.add_trace(go.Bar(x=margin_table['Practice Area'],
                          y=margin_table[salary_column] * 2,
-                         name=f'2x Cost in Salary,{currency_label}',
+                         name=f'2x Matter Matter Cost in Salary,{currency_label}',
                          marker_color='red'))
     fig.add_trace(go.Bar(x=margin_table['Practice Area'],
                          y=margin_table[revenue_column],
                          name=f'Revenue,{currency_label}',
                          marker_color='rgb(26, 100, 255)'))
-    fig.update_layout(barmode='group', title='Cost in Salary and Revenue by Practice',
+    fig.update_layout(barmode='group', title='Matter Matter Cost in Salary and Revenue by Practice',
                       legend=dict(y=1.1, orientation='h'))
     st.plotly_chart(fig, use_container_width=True)
 
@@ -208,7 +209,7 @@ def show_margin_table(margin_table, salary_column, revenue_column, currency_labe
 # не получается пока формат как я хочу
     format_config = {
         'Margin, %': st.column_config.NumberColumn(format="%.2f"),
-        salary_column: st.column_config.NumberColumn(label=f'Practice Cost in Salary,{currency_label}', format="%.0f"),
+        salary_column: st.column_config.NumberColumn(label=f'Practice Matter Matter Cost in Salary,{currency_label}', format="%.0f"),
         revenue_column: st.column_config.NumberColumn(label=f'Revenue,{currency_label}', format="%.0f"),
         'x2 Salary': st.column_config.NumberColumn(format="%.0f"),
         'Delta of Revenue and x2 Salary': st.column_config.NumberColumn(format="%.0f")
@@ -277,3 +278,118 @@ def hours_by_practice(MP):
                  title="Users' Hours Allocation", labels={'Quantity': 'Hours', 'User': ''}, height=622)
     st.plotly_chart(fig, use_container_width=True)
 
+#######################################
+# DYNAMIC REPORT VISUALS
+#######################################
+
+
+def visualize_salaries_vs_revenue(df, revenue_column, salary_column):
+    """
+    This function visualizes the relationship between total salaries and total revenue across quarters.
+    It creates a bar chart using Plotly and displays it using Streamlit.
+    It includes percentage change annotations for total revenue and salaries compared to the previous quarter.
+
+    Parameters:
+    df (pd.DataFrame): A DataFrame containing the columns: 'quarter', 'total_salaries', and 'total_revenue'.
+    """
+    # Sort the dataframe by quarter to ensure the percentage change is correct
+    df = df.sort_values(by='quarter').reset_index(drop=True)
+
+    # Calculate percentage change in revenue and salaries compared to the previous quarter
+    df['revenue_pct_change'] = df[revenue_column].pct_change() * 100
+    df['salaries_pct_change'] = df[salary_column].pct_change() * 100
+
+    # Melt the DataFrame for easier plotting (grouped by 'Quarter')
+    df_melted = df.melt(id_vars='quarter', value_vars=[salary_column, revenue_column],
+                        var_name='Metric', value_name='Amount')
+
+    # Create the Plotly figure with slim bars
+    fig = px.bar(df_melted, x='quarter', y='Amount', color='Metric',
+                 barmode='group', title='Total Salaries vs Total Revenue by Quarter',
+                 labels={'Amount': 'Amount (USD)', 'quarter': 'Quarter'},
+                 color_discrete_map={salary_column: 'red'})  # Red for salaries
+
+    # Adjust the bar width for slimmer columns
+    fig.update_traces(width=0.3)
+
+    # Add percentage change annotations for both revenue and salaries
+    for i, row in df.iterrows():
+        # Skip the first row since it doesn't have a previous quarter
+        if i == 0 or pd.isna(row['revenue_pct_change']) or pd.isna(row['salaries_pct_change']):
+            continue
+
+        # Format the percentage change with '+' or '-' sign
+        revenue_pct_change_str = f"{'+' if row['revenue_pct_change'] > 0 else ''}{row['revenue_pct_change']:.2f}%"
+        salaries_pct_change_str = f"{'+' if row['salaries_pct_change'] > 0 else ''}{row['salaries_pct_change']:.2f}%"
+
+        # Add an annotation (rectangular box) above the revenue bar
+        fig.add_annotation(
+            x=i + 0.2,
+            # Position the annotation above the revenue bar
+            y=row[revenue_column] * 1.1,
+            text=revenue_pct_change_str,
+            showarrow=False,
+            font=dict(size=12, color="black"),
+            align="center",
+            bordercolor="black",
+            borderwidth=1,
+            borderpad=4,  # Padding inside the box
+            bgcolor="white",  # Box background color
+            opacity=0.9
+        )
+
+        # Add an annotation (rectangular box) above the salaries bar
+        fig.add_annotation(
+            x=i - 0.2,
+            # Position the annotation above the salaries bar
+            y=row[salary_column] * 1.3,
+            text=salaries_pct_change_str,
+            showarrow=False,
+            font=dict(size=12, color="black"),
+            align="center",
+            bordercolor="black",
+            borderwidth=1,
+            borderpad=4,  # Padding inside the box
+            bgcolor="white",  # Box background color
+            opacity=0.9
+        )
+
+    # Customize the layout
+    fig.update_layout(xaxis_title='Quarter', yaxis_title='Amount (USD)',
+                      legend_title='Metric')
+
+    # Display the figure in Streamlit
+    st.plotly_chart(fig)
+
+
+def visualize_cost_vs_collected_time_scatter(df, salary_column, collected_time_column):
+    """
+    This function visualizes the relationship between 'Matter Cost in Salary' and 'USD Collected Time' for each 'Practice Area' across 'Quarter'.
+    It creates a scatter plot using Plotly and displays it using Streamlit.
+    
+    Parameters:
+    df (pd.DataFrame): A DataFrame containing the columns: 'Practice Area', 'Matter Cost in Salary', 'USD Collected Time', and 'Quarter'.
+    """
+    # Check if required columns are present in the DataFrame
+    if not all(col in df.columns for col in ['Practice Area', 'Matter Cost in Salary', 'USD Collected Time', 'Quarter']):
+        st.error("The DataFrame must contain 'Practice Area', 'Matter Cost in Salary', 'USD Collected Time', and 'Quarter' columns.")
+        return
+
+    # Create the scatter plot using Plotly
+    fig = px.scatter(df, x=collected_time_column, y=salary_column,
+                     color='Quarter',
+                    #  size=collected_time_column,  # size by Matter cost in salary or collected time
+                     hover_name='Practice Area',
+                     title='Scatter Plot of Matter Cost in Salary vs USD Collected Time by Practice Area and Quarter',
+                     labels={salary_column: 'Cost in Salary',
+                             collected_time_column: 'USD Collected Time'},
+                     opacity=0.7)
+
+    # Display the figure in Streamlit
+    st.plotly_chart(fig)
+
+# Example usage
+# Assuming df is a pandas DataFrame containing the columns:
+# 'Practice Area', 'Matter Cost in Salary', 'USD Collected Time', and 'Quarter'
+# Uncomment this line and pass your data to the function:
+# visualize_cost_vs_collected_time_scatter(df, 'Matter Cost in Salary', 'USD Collected Time')
