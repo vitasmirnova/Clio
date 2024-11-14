@@ -89,8 +89,12 @@ if st.button('Refresh Data'):
 full_table, short_table = pkl_to_two_dfs(pkl_data)
 st.write(full_table.rename(columns={'Matter Cost in Salary': 'Cost in Salary'}))
 
-visualize_cost_vs_collected_time_scatter(
+# visualize_cost_vs_collected_time_v1(
+#     full_table, salary_column='Matter Cost in Salary', collected_time_column='USD Collected Time')
+
+visualize_cost_vs_collected_time_v3(
     full_table, salary_column='Matter Cost in Salary', collected_time_column='USD Collected Time')
+
 
 st.write(short_table.rename(
     columns={'quarter': 'Quarter', 'total_collected_time': 'Revenue', 'total_salaries': 'Cost in Salary'}))
@@ -98,5 +102,6 @@ st.write(short_table.rename(
 visualize_salaries_vs_revenue(
     short_table, revenue_column='total_collected_time', salary_column='total_salaries')
 
-
+# visualize_cost_vs_collected_time_v4(
+#     full_table, collected_time_column='USD Collected Time')
 

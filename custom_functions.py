@@ -272,10 +272,29 @@ def client_contribution(RR, revenue_column):
 
 
 def hours_by_practice(MP):
+    # Calculate total hours per user and use it to order the User axis
+    user_totals = MP.groupby(
+        'User')['Quantity'].sum().sort_values(ascending=True)
+    user_order = user_totals.index.tolist()  # List of users sorted by total hours
+
+    # Group data by User and Practice Area, then sum the hours (Quantity)
     grouped_data = MP.groupby(['User', 'Practice Area'])[
         'Quantity'].sum().reset_index()
-    fig = px.bar(grouped_data, x='Quantity', y='User', color='Practice Area', barmode='stack',
-                 title="Users' Hours Allocation", labels={'Quantity': 'Hours', 'User': ''}, height=622)
+
+    # Create the stacked bar plot, specifying the user order in `category_orders`
+    fig = px.bar(
+        grouped_data,
+        x='Quantity',
+        y='User',
+        color='Practice Area',
+        barmode='stack',
+        title="Users' Hours Allocation by Practice Area",
+        labels={'Quantity': 'Hours', 'User': ''},
+        height=622,
+        category_orders={'User': user_order}  # Sort User axis by total hours
+    )
+
+    # Display the plot in Streamlit
     st.plotly_chart(fig, use_container_width=True)
 
 #######################################
@@ -362,34 +381,128 @@ def visualize_salaries_vs_revenue(df, revenue_column, salary_column):
     st.plotly_chart(fig)
 
 
-def visualize_cost_vs_collected_time_scatter(df, salary_column, collected_time_column):
-    """
-    This function visualizes the relationship between 'Matter Cost in Salary' and 'USD Collected Time' for each 'Practice Area' across 'Quarter'.
-    It creates a scatter plot using Plotly and displays it using Streamlit.
-    
-    Parameters:
-    df (pd.DataFrame): A DataFrame containing the columns: 'Practice Area', 'Matter Cost in Salary', 'USD Collected Time', and 'Quarter'.
-    """
-    # Check if required columns are present in the DataFrame
-    if not all(col in df.columns for col in ['Practice Area', 'Matter Cost in Salary', 'USD Collected Time', 'Quarter']):
-        st.error("The DataFrame must contain 'Practice Area', 'Matter Cost in Salary', 'USD Collected Time', and 'Quarter' columns.")
-        return
+def visualize_cost_vs_collected_time_v1(df, salary_column, collected_time_column):
 
-    # Create the scatter plot using Plotly
-    fig = px.scatter(df, x=collected_time_column, y=salary_column,
-                     color='Quarter',
-                    #  size=collected_time_column,  # size by Matter cost in salary or collected time
-                     hover_name='Practice Area',
-                     title='Scatter Plot of Matter Cost in Salary vs USD Collected Time by Practice Area and Quarter',
-                     labels={salary_column: 'Cost in Salary',
-                             collected_time_column: 'USD Collected Time'},
-                     opacity=0.7)
+    # Create the bar plot
+    fig = px.bar(df,
+                 x='Quarter',
+                 y=collected_time_column,
+                 color='Practice Area',
+                 facet_col='Practice Area',
+                 title='USD Collected Time by Practice Area and Quarter',
+                 labels={collected_time_column: 'USD Collected Time',
+                         'Practice Area': 'Practice Area'},
+                 height=500
+                 )
 
-    # Display the figure in Streamlit
+    # Loop through layout annotations to remove facet labels
+    for axis in fig.layout.annotations:
+        axis['text'] = ""  # Set facet labels to empty
+
+    fig.for_each_annotation(lambda a: a.update(text=''))
+
+    # Customize the layout
+    fig.update_layout(
+        yaxis_title='USD Collected Time',
+        showlegend=True,  # Keeps the legend visible
+    )
+
+    fig.update_xaxes(showticklabels=False)
+    fig.update_xaxes(title_text="")  # This removes "Quarter" label
+    fig.update_layout(xaxis_title=None)  # This removes any x-axis title
+
+    # Display in Streamlit
     st.plotly_chart(fig)
 
-# Example usage
-# Assuming df is a pandas DataFrame containing the columns:
-# 'Practice Area', 'Matter Cost in Salary', 'USD Collected Time', and 'Quarter'
-# Uncomment this line and pass your data to the function:
-# visualize_cost_vs_collected_time_scatter(df, 'Matter Cost in Salary', 'USD Collected Time')
+
+def visualize_cost_vs_collected_time_v2(df, salary_column, collected_time_column):
+    # Create the bar plot
+    fig = px.bar(df,
+                 x='Quarter',
+                 y=collected_time_column,
+                 color='Practice Area',
+                 barmode='group',
+                 title='USD Collected Time by Practice Area and Quarter',
+                 labels={collected_time_column: 'USD Collected Time',
+                         'Practice Area': 'Practice Area'},
+                 height=500
+                 )
+
+    # Customize the layout
+    fig.update_layout(
+        yaxis_title='USD Collected Time',
+        showlegend=True,  # Keeps the legend visible
+    )
+
+    # Remove x-axis tick labels for a cleaner look
+    fig.update_xaxes(showticklabels=False)
+    fig.update_xaxes(title_text="")  # This removes "Quarter" label
+    fig.update_layout(xaxis_title=None)  # This removes any x-axis title
+
+    # Display in Streamlit
+    st.plotly_chart(fig)
+
+
+def visualize_cost_vs_collected_time_v3(df, salary_column, collected_time_column):
+    # Create the bar plot
+    fig = px.bar(df,
+                 x='Practice Area',  # Set Practice Area as x-axis
+                 y=collected_time_column,
+                 color='Quarter',
+                 barmode='group',  # Group bars by Practice Area
+                 title='USD Collected Time by Practice Area and Quarter',
+                 labels={collected_time_column: 'USD Collected Time',
+                         'Practice Area': 'Practice Area'},
+                 height=500
+                 )
+
+    # Customize the layout
+    fig.update_layout(
+        yaxis_title='USD Collected Time',
+        showlegend=True,  # Keeps the legend visible
+    )
+
+    # Remove x-axis tick labels for a cleaner look
+    fig.update_xaxes(title_text="Practice Area")  # Set title for the x-axis
+
+    # Display in Streamlit
+    st.plotly_chart(fig)
+
+
+def visualize_cost_vs_collected_time_v4(df, collected_time_column):
+    # Assign specific colors to each practice area for consistency across quarters
+    # color_discrete_map = {
+    #     'Litigation': '#1f77b4',  # blue
+    #     'Crypto Law': '#ff7f0e',  # orange
+    #     'Family Law': '#2ca02c',  # green
+    #     'Corporate': '#d62728',   # red
+    #     'Intellectual Property': '#9467bd'  # purple
+    #     # Add more practice areas and colors if needed
+    # }
+
+    # Create the bar plot
+    df = df.groupby(['Practice Area', 'Quarter'], as_index=False)[
+        collected_time_column].sum()
+    
+    fig = px.bar(
+        df,
+        y=collected_time_column,
+        color='Practice Area',
+        text='Quarter',  # Display quarter on each bar
+        # barmode='group',  # Grouped bars by practice area
+        title='Total USD Collected Time by Practice Area and Quarter',
+        labels={collected_time_column: 'USD Collected Time'},
+        height=600
+    )
+
+    # Customize layout
+    fig.update_layout(
+        xaxis_title='Practice Area',
+        yaxis_title='Total USD Collected Time',
+    )
+
+    # Add text to each bar to indicate the quarter
+    fig.update_traces(textposition='outside')
+
+    # Display in Streamlit
+    st.plotly_chart(fig)
