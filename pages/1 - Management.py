@@ -27,13 +27,16 @@ st.subheader('Management report')
 
 # !! This section is modified for every practice
 
+# if st.experimental_user.is_logged_in:
+#     st.write(st.experimental_user)
+
 page_allowed_emails = st.secrets["management_emails"]
 
 # Debugging lines
 # st.write(st.experimental_user.email)
 # st.write(page_allowed_emails)
 
-authenticate(st.experimental_user.email, page_allowed_emails) # Stops the app if the email is not in the allowed list
+authenticate(st.user.email, page_allowed_emails) # Stops the app if the email is not in the allowed list
 
 # Create connection object and retrieve file contents.
 conn = st.connection('gcs', type=FilesConnection)

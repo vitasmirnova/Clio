@@ -13,7 +13,7 @@ st.set_page_config(
 st.header("Welcome! 👋")
 st.info('Choose a practice from the sidebar', icon='ℹ️')
 
-st.write(f'User: {st.experimental_user.email}')
+st.write(f'User: {st.user.email}')
 
 roles = {
     'Management': st.secrets['management_emails'],
@@ -28,4 +28,4 @@ def get_user_role(email):
             return role
     return 'No role found'
 
-st.write(f'Role: {get_user_role(st.experimental_user.email)}')
+st.write(f'Role: {get_user_role(st.user.email)}')

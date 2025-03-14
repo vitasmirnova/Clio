@@ -8,7 +8,7 @@ clio_functions.py
 legacy.py
 *.csv
 .DS_Store
-v2
+data
 *.icloud
 freeze.txt
 .streamlit/secrets.toml
