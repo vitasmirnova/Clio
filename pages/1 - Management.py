@@ -36,7 +36,7 @@ page_allowed_emails = st.secrets["management_emails"]
 # st.write(st.experimental_user.email)
 # st.write(page_allowed_emails)
 
-authenticate(st.user.email, page_allowed_emails) # Stops the app if the email is not in the allowed list
+authenticate(st.experimental_user.email, page_allowed_emails) # Stops the app if the email is not in the allowed list
 
 # Create connection object and retrieve file contents.
 conn = st.connection('gcs', type=FilesConnection)
