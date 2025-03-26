@@ -24,7 +24,7 @@ st.subheader('Litigation practice report')
 
 # !! This section is modified for every practice
 
-page_allowed_emails = st.secrets["litigation_law_emails"] + \
+page_allowed_emails = st.secrets["litigation_emails"] + \
     st.secrets["management_emails"]
 
 # Debugging lines
