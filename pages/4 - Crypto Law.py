@@ -38,8 +38,8 @@ authenticate(st.experimental_user.email, page_allowed_emails)
 conn = st.connection('gcs', type=FilesConnection)
 
 
-st.info('TBA')
-st.stop()
+# st.info('TBA')
+# st.stop()
 
 #######################################
 # PRACTICE FOLDER PATH, CURRENCY

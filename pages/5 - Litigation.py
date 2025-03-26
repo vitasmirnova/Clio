@@ -9,13 +9,14 @@ from custom_functions import *
 # !! This section is modified for every practice
 
 st.set_page_config(
-    page_title='BK reporting – US General',
+    page_title='BK reporting – Litigation',
     layout='wide'
 )
 
 # Setting a title
 st.title('Clio Reports Analyzer')
-st.subheader('US General practice report')
+st.subheader('Litigation practice report')
+
 
 #######################################
 # AUTHENTIFICATION
@@ -23,7 +24,7 @@ st.subheader('US General practice report')
 
 # !! This section is modified for every practice
 
-page_allowed_emails = st.secrets["us_general_emails"] + \
+page_allowed_emails = st.secrets["litigation_law_emails"] + \
     st.secrets["management_emails"]
 
 # Debugging lines
@@ -36,6 +37,7 @@ authenticate(st.experimental_user.email, page_allowed_emails)
 # Create connection object and retrieve file contents.
 conn = st.connection('gcs', type=FilesConnection)
 
+
 # st.info('TBA')
 # st.stop()
 
@@ -45,7 +47,7 @@ conn = st.connection('gcs', type=FilesConnection)
 
 # !! This section is modified for every practice
 
-folder_path = "clio-reports/us_general"
+folder_path = "clio-reports/litigation"
 
 revenue_column = 'USD Collected Time'
 salary_column = 'Matter Cost in Salary'
