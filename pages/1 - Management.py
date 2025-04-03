@@ -129,3 +129,5 @@ with lower_left_line:
 with lower_right_line:
     with st.container(border=True):
         hours_by_practice(MP)
+
+display_user_hours_table(MP)

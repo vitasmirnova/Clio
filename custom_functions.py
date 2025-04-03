@@ -294,8 +294,43 @@ def hours_by_practice(MP):
         category_orders={'User': user_order}  # Sort User axis by total hours
     )
 
+    # Add total hours annotations for each user
+    for user, total_hours in user_totals.items():
+        fig.add_annotation(
+            x=total_hours,
+            y=user,
+            text=f"{total_hours:.0f}",  # Display total hours (rounded)
+            showarrow=False,
+            font=dict(size=12, color="black"),
+            xshift=10  # Offset text slightly to avoid overlap
+        )
+
     # Display the plot in Streamlit
     st.plotly_chart(fig, use_container_width=True)
+
+
+def display_user_hours_table(MP):
+    # Compute required columns
+    user_hours_table = MP.groupby('User').agg(
+        User_Primary_Hours=('User Primary Hours', 'sum'),
+        User_Marketing_Hours=('User Marketing Hours', 'sum'),
+        User_Total_Hours=('User Total Hours', 'sum')
+    ).reset_index()
+
+    # Add calculated column: User Primary Hours / 360
+    user_hours_table['User_Primary_Hours_per_360'] = user_hours_table['User_Primary_Hours'] / 360
+
+    # Rename columns for better readability
+    user_hours_table.rename(columns={
+        'User_Primary_Hours': 'User Client Hours',
+        'User_Marketing_Hours': 'User Marketing Hours',
+        'User_Total_Hours': 'User Total Hours',
+        'User_Primary_Hours_per_360': 'User Primary Hours Share'
+    }, inplace=True)
+
+    # Display the table in Streamlit
+    st.write("### User Hours Table")
+    st.dataframe(user_hours_table, use_container_width=True)
 
 #######################################
 # DYNAMIC REPORT VISUALS
