@@ -312,9 +312,9 @@ def hours_by_practice(MP):
 def display_user_hours_table(MP):
     # Compute required columns
     user_hours_table = MP.groupby('User').agg(
-        User_Primary_Hours=('User Primary Hours', 'sum'),
-        User_Marketing_Hours=('User Marketing Hours', 'sum'),
-        User_Total_Hours=('User Total Hours', 'sum')
+        User_Primary_Hours=('User Primary Hours', 'first'),
+        User_Marketing_Hours=('User Marketing Hours', 'first'),
+        User_Total_Hours=('User Total Hours', 'first')
     ).reset_index()
 
     # Add calculated column: User Primary Hours / 360
