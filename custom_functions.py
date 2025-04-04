@@ -184,13 +184,13 @@ def plot_chart_salary_and_collected_time(margin_table, salary_column, revenue_co
     fig = go.Figure()
     fig.add_trace(go.Bar(x=margin_table['Practice Area'],
                          y=margin_table[salary_column] * 2,
-                         name=f'2x Matter Matter Cost in Salary,{currency_label}',
+                         name=f'2x Matter Cost in Salary,{currency_label}',
                          marker_color='red'))
     fig.add_trace(go.Bar(x=margin_table['Practice Area'],
                          y=margin_table[revenue_column],
                          name=f'Revenue,{currency_label}',
                          marker_color='rgb(26, 100, 255)'))
-    fig.update_layout(barmode='group', title='Matter Matter Cost in Salary and Revenue by Practice',
+    fig.update_layout(barmode='group', title='Matter Cost in Salary and Revenue by Practice',
                       legend=dict(y=1.1, orientation='h'))
     st.plotly_chart(fig, use_container_width=True)
 
@@ -209,7 +209,7 @@ def show_margin_table(margin_table, salary_column, revenue_column, currency_labe
 # не получается пока формат как я хочу
     format_config = {
         'Margin, %': st.column_config.NumberColumn(format="%.2f"),
-        salary_column: st.column_config.NumberColumn(label=f'Practice Matter Matter Cost in Salary,{currency_label}', format="%.0f"),
+        salary_column: st.column_config.NumberColumn(label=f'Practice Cost in Salary,{currency_label}', format="%.0f"),
         revenue_column: st.column_config.NumberColumn(label=f'Revenue,{currency_label}', format="%.0f"),
         'x2 Salary': st.column_config.NumberColumn(format="%.0f"),
         'Delta of Revenue and x2 Salary': st.column_config.NumberColumn(format="%.0f")
