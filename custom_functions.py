@@ -317,16 +317,30 @@ def display_user_hours_table(MP):
         User_Total_Hours=('User Total Hours', 'first')
     ).reset_index()
 
-    # Add calculated column: User Primary Hours / 360
-    user_hours_table['User_Primary_Hours_per_360'] = user_hours_table['User_Primary_Hours'] / 360
+    # Add calculated columns
+    user_hours_table['User_Total_Hours_per_360'] = user_hours_table['User_Total_Hours'] / 360
+    user_hours_table['User_Billable_Hours_In_Total'] = user_hours_table['User_Primary_Hours'] / \
+        user_hours_table['User_Total_Hours']
+    user_hours_table['User_Marketing_Hours_In_Total'] = user_hours_table['User_Marketing_Hours'] / \
+        user_hours_table['User_Total_Hours']
 
-    # Rename columns for better readability
+    # Rename columns for readability
     user_hours_table.rename(columns={
+        'User_Total_Hours_per_360': 'Share of Total Hours in 360h',
+        'User_Billable_Hours_In_Total': 'Share of Client Hours',
+        'User_Marketing_Hours_In_Total': 'Share of Marketing Hours',
         'User_Primary_Hours': 'User Client Hours',
         'User_Marketing_Hours': 'User Marketing Hours',
         'User_Total_Hours': 'User Total Hours',
-        'User_Primary_Hours_per_360': 'User Primary Hours Share'
     }, inplace=True)
+
+    # Format percentage columns
+    user_hours_table['Share of Client Hours'] = user_hours_table['Share of Client Hours'].map(
+        lambda x: f"{x:.1%}")
+    user_hours_table['Share of Marketing Hours'] = user_hours_table['Share of Marketing Hours'].map(
+        lambda x: f"{x:.1%}")
+    user_hours_table['Share of Total Hours in 360h'] = user_hours_table['Share of Total Hours in 360h'].map(
+        lambda x: f"{x:.1%}")
 
     # Display the table in Streamlit
     st.write("### User Hours Table")
