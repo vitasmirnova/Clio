@@ -130,4 +130,8 @@ with lower_right_line:
     with st.container(border=True):
         hours_by_practice(MP)
 
-display_user_hours_table(MP)
+
+try:
+    display_user_hours_table(MP)
+except:
+    st.info('No hours table avaliable', icon='ℹ️')
