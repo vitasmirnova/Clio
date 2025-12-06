@@ -57,17 +57,45 @@ currency_label = ' USD'
 # PERIOD AND DATA LOADING FROM CLOUD
 #######################################
 
-# Get the desired period
+# Get available periods
 periods_list = create_periods_list(conn, folder_path)
-chosen_period = st.selectbox("Select period:", periods_list)
 
-# Load data from the cloud
-# st.write(f"{folder_path}/{chosen_period}/MP_{chosen_period}.csv") debug line
+# Independent dropdowns
+years = [2024, 2025, 2026]
+quarters = ["Q1", "Q2", "Q3", "Q4"]
 
-MP = conn.read(
-    f"{folder_path}/{chosen_period}/MP_{chosen_period}.csv", input_format="csv", ttl=600)
-RR = conn.read(
-    f"{folder_path}/{chosen_period}/RR_{chosen_period}.csv", input_format="csv", ttl=600)
+selected_year = st.selectbox("Select year:", years)
+selected_quarter = st.selectbox("Select quarter:", quarters)
+
+chosen_period = f"{selected_quarter}_{selected_year}"
+
+# Check if this period actually exists in cloud data
+if chosen_period not in periods_list:
+    st.warning("No data available for this period")
+else:
+    # Load from cloud
+    MP = conn.read(
+        f"{folder_path}/{chosen_period}/MP_{chosen_period}.csv",
+        input_format="csv",
+        ttl=600
+    )
+    RR = conn.read(
+        f"{folder_path}/{chosen_period}/RR_{selected_quarter}_{selected_year}.csv",
+        input_format="csv",
+        ttl=600
+    )
+
+# # Get the desired period
+# periods_list = create_periods_list(conn, folder_path)
+# chosen_period = st.selectbox("Select period:", periods_list)
+
+# # Load data from the cloud
+
+
+# MP = conn.read(
+#     f"{folder_path}/{chosen_period}/MP_{chosen_period}.csv", input_format="csv", ttl=600)
+# RR = conn.read(
+#     f"{folder_path}/{chosen_period}/RR_{chosen_period}.csv", input_format="csv", ttl=600)
 
 #######################################
 # DATA VIEWING
