@@ -550,7 +550,7 @@ def visualize_cost_vs_collected_time_v4(df, collected_time_column):
     st.plotly_chart(fig)
 
 
-def visualize_cost_vs_collected_time_v5(df, collected_time_column):
+def visualize_cost_vs_collected_time_v5(df, salary_column, collected_time_column):
     # --- Create sortable quarter components ---
     df[['Q', 'Y']] = df['Quarter'].str.split('_', expand=True)
     df['Y'] = df['Y'].astype(int)
