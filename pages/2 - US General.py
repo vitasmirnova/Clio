@@ -59,17 +59,20 @@ currency_label = ' USD'
 periods_list = create_periods_list(conn, folder_path)
 
 # Independent dropdowns
-years = [2024, 2025, 2026]
+years = [2025, 2026]
 quarters = ["Q1", "Q2", "Q3", "Q4"]
 
-selected_year = st.selectbox("Select year:", years)
-selected_quarter = st.selectbox("Select quarter:", quarters)
+selected_year = st.selectbox(
+    "Select year:", years, index=years.index(2025))   # preselect 2025
+selected_quarter = st.selectbox(
+    "Select quarter:", quarters, index=quarters.index("Q3"))  # preselect Q3
 
 chosen_period = f"{selected_quarter}_{selected_year}"
 
 # Check if this period actually exists in cloud data
 if chosen_period not in periods_list:
     st.warning("No data available for this period")
+    st.stop()
 else:
     # Load from cloud
     MP = conn.read(

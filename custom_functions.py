@@ -548,3 +548,42 @@ def visualize_cost_vs_collected_time_v4(df, collected_time_column):
 
     # Display in Streamlit
     st.plotly_chart(fig)
+
+
+def visualize_cost_vs_collected_time_v5(df, collected_time_column):
+    # --- Create sortable quarter components ---
+    df[['Q', 'Y']] = df['Quarter'].str.split('_', expand=True)
+    df['Y'] = df['Y'].astype(int)
+    df['Q'] = df['Q'].str.replace('Q', '').astype(int)
+
+    # Sort by year and quarter
+    df = df.sort_values(['Y', 'Q'])
+
+    # Restore the original quarter label order
+    df['Quarter'] = df['Quarter'].astype(str)
+
+    # --- Bar chart ---
+    fig = px.bar(
+        df,
+        x='Practice Area',
+        y=collected_time_column,
+        color='Quarter',
+        barmode='group',
+        title='USD Collected Time by Practice Area and Quarter',
+        labels={
+            collected_time_column: 'USD Collected Time',
+            'Practice Area': 'Practice Area'
+        },
+        height=500
+    )
+
+    # Layout tweaks
+    fig.update_layout(
+        yaxis_title='USD Collected Time',
+        showlegend=True,
+    )
+
+    fig.update_xaxes(title_text="Practice Area")
+
+    # Render
+    st.plotly_chart(fig)

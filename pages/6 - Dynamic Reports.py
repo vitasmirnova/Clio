@@ -92,7 +92,8 @@ st.write(full_table.rename(columns={'Matter Cost in Salary': 'Cost in Salary'}))
 # visualize_cost_vs_collected_time_v1(
 #     full_table, salary_column='Matter Cost in Salary', collected_time_column='USD Collected Time')
 
-visualize_cost_vs_collected_time_v3(
+# version of v4 with right sorting
+visualize_cost_vs_collected_time_v5(
     full_table, salary_column='Matter Cost in Salary', collected_time_column='USD Collected Time')
 
 
