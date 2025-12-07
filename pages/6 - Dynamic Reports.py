@@ -94,7 +94,7 @@ short_table = short_table.sort_values(
 )
 
 full_table = full_table.sort_values(
-    by="quarter",
+    by="Quarter",
     key=lambda col: col.map(quarter_sort_key)
 )
 st.write(full_table.rename(columns={'Matter Cost in Salary': 'Cost in Salary'}))
