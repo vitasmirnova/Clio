@@ -87,12 +87,24 @@ if st.button('Refresh Data'):
                  salary_column, dynamic_folder_path, dynamic_file_name, conn)
 
 full_table, short_table = pkl_to_two_dfs(pkl_data)
+
+short_table = short_table.sort_values(
+    by="quarter",
+    key=lambda col: col.map(quarter_sort_key)
+)
+
+full_table = full_table.sort_values(
+    by="quarter",
+    key=lambda col: col.map(quarter_sort_key)
+)
 st.write(full_table.rename(columns={'Matter Cost in Salary': 'Cost in Salary'}))
 
-# visualize_cost_vs_collected_time_v1(
-#     full_table, salary_column='Matter Cost in Salary', collected_time_column='USD Collected Time')
 
-# version of v4 with right sorting
+#######################################
+# VISUALISATION
+####################################### 
+
+# version of v3 with right sorting
 visualize_cost_vs_collected_time_v5(
     full_table, salary_column='Matter Cost in Salary', collected_time_column='USD Collected Time')
 
@@ -102,7 +114,4 @@ st.write(short_table.rename(
 
 visualize_salaries_vs_revenue(
     short_table, revenue_column='total_collected_time', salary_column='total_salaries')
-
-# visualize_cost_vs_collected_time_v4(
-#     full_table, collected_time_column='USD Collected Time')
 

@@ -35,6 +35,10 @@ def create_periods_list(conn, path):
     return periods_list
 
 
+def quarter_sort_key(p):
+    q, y = p.split("_")
+    return (int(y), int(q[1:]))
+
 #######################################
 # DYNAMIC REPORT DATA HANDLING
 #######################################
@@ -354,7 +358,10 @@ def visualize_salaries_vs_revenue(df, revenue_column, salary_column):
     df (pd.DataFrame): A DataFrame containing the columns: 'quarter', 'total_salaries', and 'total_revenue'.
     """
     # Sort the dataframe by quarter to ensure the percentage change is correct
-    df = df.sort_values(by='quarter').reset_index(drop=True)
+    df = df.sort_values(
+        by='quarter',
+        key=lambda col: col.map(quarter_sort_key)
+    ).reset_index(drop=True)
 
     # Calculate percentage change in revenue and salaries compared to the previous quarter
     df['revenue_pct_change'] = df[revenue_column].pct_change() * 100
@@ -549,7 +556,7 @@ def visualize_cost_vs_collected_time_v4(df, collected_time_column):
     # Display in Streamlit
     st.plotly_chart(fig)
 
-
+# current version
 def visualize_cost_vs_collected_time_v5(df, salary_column, collected_time_column):
     # --- Create sortable quarter components ---
     df[['Q', 'Y']] = df['Quarter'].str.split('_', expand=True)
