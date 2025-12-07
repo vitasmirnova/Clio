@@ -91,12 +91,12 @@ full_table, short_table = pkl_to_two_dfs(pkl_data)
 short_table = short_table.sort_values(
     by="quarter",
     key=lambda col: col.map(quarter_sort_key)
-)
+).reset_index()
 
 full_table = full_table.sort_values(
     by="Quarter",
     key=lambda col: col.map(quarter_sort_key)
-)
+).reset_index()
 st.write(full_table.rename(columns={'Matter Cost in Salary': 'Cost in Salary'}))
 
 
