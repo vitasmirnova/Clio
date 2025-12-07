@@ -93,7 +93,7 @@ short_table = short_table.sort_values(
     key=lambda col: col.map(quarter_sort_key)
 ).reset_index(drop=True)
 
-full_table = full_table.sort_values(
+full_table = full_table[full_table['Practice Area'] != 'Internal Projects'].sort_values(
     by="Quarter",
     key=lambda col: col.map(quarter_sort_key)
 ).reset_index(drop=True)
@@ -107,7 +107,6 @@ st.write(full_table.rename(columns={'Matter Cost in Salary': 'Cost in Salary'}))
 # version of v3 with right sorting
 visualize_cost_vs_collected_time_v5(
     full_table, salary_column='Matter Cost in Salary', collected_time_column='USD Collected Time')
-
 
 st.write(short_table.rename(
     columns={'quarter': 'Quarter', 'total_collected_time': 'Revenue', 'total_salaries': 'Cost in Salary'}))
