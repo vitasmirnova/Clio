@@ -662,7 +662,7 @@ def visualize_years_stacked(yearly):
         yearly.groupby(['Year', 'Q'])
             .agg({
                 'USD Collected Time': 'sum',
-                'Cost in Salary': 'sum'
+                'Matter Cost in Salary': 'sum'
             })
         .reset_index()
     )
@@ -683,14 +683,14 @@ def visualize_years_stacked(yearly):
         df_q = q_agg[q_agg['Q'] == q]
         fig.add_trace(go.Bar(
             x=df_q['Year'].astype(str) + " – Salaries",
-            y=df_q['Cost in Salary'],
+            y=df_q['Matter Cost in Salary'],
             name=f"{q} Salaries"
         ))
 
     # --- Add total annotations ---
     # Compute totals per bar
     revenue_totals = q_agg.groupby('Year')['USD Collected Time'].sum()
-    salary_totals = q_agg.groupby('Year')['Cost in Salary'].sum()
+    salary_totals = q_agg.groupby('Year')['Matter Cost in Salary'].sum()
 
     for i, year in enumerate(revenue_totals.index):
         # Revenue
@@ -730,15 +730,15 @@ def visualize_waterfall(yearly):
         yearly.groupby('Year')
             .agg({
                 'USD Collected Time': 'sum',
-                'Cost in Salary': 'sum'
+                'Matter Cost in Salary': 'sum'
             })
         .reset_index()
     )
 
     # Compute intermediate totals
     totals['Salaries Net'] = totals['USD Collected Time'] - \
-        totals['Cost in Salary']
-    totals['Other Costs (≈)'] = totals['Cost in Salary']  # same as salaries
+        totals['Matter Cost in Salary']
+    totals['Other Costs (≈)'] = totals['Matter Cost in Salary']  # same as salaries
     totals['Net'] = totals['Salaries Net'] - totals['Other Costs (≈)']
 
     fig = go.Figure()
@@ -746,7 +746,7 @@ def visualize_waterfall(yearly):
     for idx, row in totals.iterrows():
         year = str(row['Year'])
         revenue = row['USD Collected Time']
-        salaries = row['Cost in Salary']
+        salaries = row['Matter Cost in Salary']
         salaries_net = row['Salaries Net']
         other_costs = row['Other Costs (≈)']
         net = row['Net']
