@@ -100,7 +100,7 @@ full_table = full_table[full_table['Practice Area'] != 'Internal Projects'].sort
 st.write(full_table.rename(columns={'Matter Cost in Salary': 'Cost in Salary'}))
 
 yearly_table = build_yearly_table(full_table)
-
+st.write(yearly_table)
 #######################################
 # VISUALISATION QUARTERS
 ####################################### 
@@ -120,7 +120,7 @@ visualize_salaries_vs_revenue(
 # VISUALISATION YEARS
 #######################################
 
-st.write(yearly_table)
+
 
 visualize_years_stacked(full_table)
 
