@@ -139,7 +139,7 @@ def build_yearly_table(full_table):
         yearly.groupby('Year')
         .agg({
             'USD Collected Time': 'sum',
-            'Cost in Salary': 'sum',
+            'Matter Cost in Salary': 'sum',
             'x2 Salary': 'sum',
             'Delta of Revenue and x2 Salary': 'sum'
 
@@ -149,7 +149,7 @@ def build_yearly_table(full_table):
 
     # Add margin calculations
     yearly_summary['Margin, USD'] = yearly_summary['USD Collected Time'] - \
-        yearly_summary['Cost in Salary']
+        yearly_summary['Matter Cost in Salary']
     yearly_summary['Margin, %'] = (
         yearly_summary['Margin, USD'] / yearly_summary['USD Collected Time']) * 100
     yearly_summary['Margin with 2x Salary, %'] = (
@@ -157,7 +157,7 @@ def build_yearly_table(full_table):
     # Formatting
     yearly_summary['Revenue'] = yearly_summary['USD Collected Time'].round(
         0).astype(int)  # .map('{:,.0f}'.format)
-    yearly_summary['Salaries'] = yearly_summary['Cost in Salary'].round(
+    yearly_summary['Salaries'] = yearly_summary['Matter Cost in Salary'].round(
         0).astype(int)  # .map('{:,.0f}'.format)
     yearly_summary['Margin, USD'] = yearly_summary['Margin, USD'].round(
         0).astype(int)  # .map('{:,.0f}'.format)
