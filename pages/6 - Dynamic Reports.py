@@ -124,4 +124,4 @@ st.write(yearly_table)
 
 visualize_years_stacked(full_table)
 
-visualize_years_stacked(full_table)
+visualize_waterfall(full_table)
