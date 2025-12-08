@@ -99,9 +99,10 @@ full_table = full_table[full_table['Practice Area'] != 'Internal Projects'].sort
 ).reset_index(drop=True)
 st.write(full_table.rename(columns={'Matter Cost in Salary': 'Cost in Salary'}))
 
+yearly_table = build_yearly_table(full_table)
 
 #######################################
-# VISUALISATION
+# VISUALISATION QUARTERS
 ####################################### 
 
 # version of v3 with right sorting
@@ -114,3 +115,13 @@ st.write(short_table.rename(
 visualize_salaries_vs_revenue(
     short_table, revenue_column='total_collected_time', salary_column='total_salaries')
 
+
+#######################################
+# VISUALISATION YEARS
+#######################################
+
+st.write(yearly_table)
+
+visualize_years_stacked(full_table)
+
+visualize_years_stacked(full_table)

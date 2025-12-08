@@ -126,6 +126,54 @@ def pkl_to_two_dfs(pkl_file):
 
     return combined_df, main_stats_df
 
+# Yearly summary table 
+def build_yearly_table(full_table):
+    
+    yearly = full_table.copy()
+
+    # Extract year from "Quarter" column (Q1_2024 -> 2024)
+    yearly['Year'] = yearly['Quarter'].str.split('_').str[1].astype(int)
+
+    # Aggregate to yearly level
+    yearly_summary = (
+        yearly.groupby('Year')
+        .agg({
+            'USD Collected Time': 'sum',
+            'Cost in Salary': 'sum',
+            'x2 Salary': 'sum',
+            'Delta of Revenue and x2 Salary': 'sum'
+
+        })
+        .reset_index()
+    )
+
+    # Add margin calculations
+    yearly_summary['Margin, USD'] = yearly_summary['USD Collected Time'] - \
+        yearly_summary['Cost in Salary']
+    yearly_summary['Margin, %'] = (
+        yearly_summary['Margin, USD'] / yearly_summary['USD Collected Time']) * 100
+    yearly_summary['Margin with 2x Salary, %'] = (
+        yearly_summary['Delta of Revenue and x2 Salary'] / yearly_summary['USD Collected Time']) * 100
+    # Formatting
+    yearly_summary['Revenue'] = yearly_summary['USD Collected Time'].round(
+        0).astype(int)  # .map('{:,.0f}'.format)
+    yearly_summary['Salaries'] = yearly_summary['Cost in Salary'].round(
+        0).astype(int)  # .map('{:,.0f}'.format)
+    yearly_summary['Margin, USD'] = yearly_summary['Margin, USD'].round(
+        0).astype(int)  # .map('{:,.0f}'.format)
+    yearly_summary['Margin, %'] = yearly_summary['Margin, %'].round(2)
+    yearly_summary['x2 Salary'] = yearly_summary['x2 Salary'].round(
+        0).astype(int)  # .map('{:,.0f}'.format)
+    yearly_summary['Margin with x2 Salary, USD'] = yearly_summary['Delta of Revenue and x2 Salary'].round(
+        0).astype(int)  # .map('{:,.0f}'.format)
+    yearly_summary['Margin with x2 Salary, %'] = yearly_summary['Margin with 2x Salary, %'].round(
+        2)
+
+    # Keep columns tidy
+    yearly_summary = yearly_summary[['Year', 'Revenue', 'Salaries', 'Margin, USD',
+                                    'Margin, %', 'x2 Salary', 'Margin with x2 Salary, USD', 'Margin with x2 Salary, %']]
+    return yearly_summary
+
 #######################################
 # VIZUALIZATION METHODS AND FUNCTIONS
 #######################################
@@ -344,7 +392,7 @@ def display_user_hours_table(MP):
     st.dataframe(user_hours_table, use_container_width=True)
 
 #######################################
-# DYNAMIC REPORT VISUALS
+# DYNAMIC REPORT VISUALS QUARTERS
 #######################################
 
 
@@ -591,6 +639,148 @@ def visualize_cost_vs_collected_time_v5(df, salary_column, collected_time_column
     )
 
     fig.update_xaxes(title_text="Practice Area")
+
+    # Render
+    st.plotly_chart(fig)
+
+
+#######################################
+# DYNAMIC REPORT VISUALS YEARS
+#######################################
+def visualize_years_stacked(yearly):
+    
+    # Extract year and quarter components
+    yearly['Year'] = yearly['Quarter'].str.split('_').str[1].astype(int)
+    yearly['Q'] = yearly['Quarter'].str.split('_').str[0]
+
+    quarter_order = ["Q1", "Q2", "Q3", "Q4"]
+    yearly['Q'] = pd.Categorical(
+        yearly['Q'], categories=quarter_order, ordered=True)
+
+    # Aggregate per year + quarter
+    q_agg = (
+        yearly.groupby(['Year', 'Q'])
+            .agg({
+                'USD Collected Time': 'sum',
+                'Cost in Salary': 'sum'
+            })
+        .reset_index()
+    )
+
+    fig = go.Figure()
+
+    # --- Revenue stacked bar ---
+    for q in quarter_order:
+        df_q = q_agg[q_agg['Q'] == q]
+        fig.add_trace(go.Bar(
+            x=df_q['Year'].astype(str) + " – Revenue",
+            y=df_q['USD Collected Time'],
+            name=f"{q} Revenue"
+        ))
+
+    # --- Salaries stacked bar ---
+    for q in quarter_order:
+        df_q = q_agg[q_agg['Q'] == q]
+        fig.add_trace(go.Bar(
+            x=df_q['Year'].astype(str) + " – Salaries",
+            y=df_q['Cost in Salary'],
+            name=f"{q} Salaries"
+        ))
+
+    # --- Add total annotations ---
+    # Compute totals per bar
+    revenue_totals = q_agg.groupby('Year')['USD Collected Time'].sum()
+    salary_totals = q_agg.groupby('Year')['Cost in Salary'].sum()
+
+    for i, year in enumerate(revenue_totals.index):
+        # Revenue
+        fig.add_annotation(
+            x=str(year) + " – Revenue",
+            y=revenue_totals[year] + 50000,  # slightly above the top
+            text=f"${int(revenue_totals[year]):,}",
+            showarrow=False,
+            font=dict(size=12, color="black")
+        )
+        # Salaries
+        fig.add_annotation(
+            x=str(year) + " – Salaries",
+            y=salary_totals[year] + 50000,
+            text=f"${int(salary_totals[year]):,}",
+            showarrow=False,
+            font=dict(size=12, color="black")
+        )
+
+    fig.update_layout(
+        barmode='stack',
+        title="Revenue and Salaries by Year",
+        xaxis_title="Year",
+        yaxis_title="USD",
+        legend_title="Breakdown"
+    )
+
+    # Render
+    st.plotly_chart(fig)
+
+def visualize_waterfall(yearly):
+    # --- Prepare yearly totals ---
+    yearly['Year'] = yearly['Quarter'].str.split(
+        '_').str[1]  # .astype(int).round(0)
+
+    totals = (
+        yearly.groupby('Year')
+            .agg({
+                'USD Collected Time': 'sum',
+                'Cost in Salary': 'sum'
+            })
+        .reset_index()
+    )
+
+    # Compute intermediate totals
+    totals['Salaries Net'] = totals['USD Collected Time'] - \
+        totals['Cost in Salary']
+    totals['Other Costs (≈)'] = totals['Cost in Salary']  # same as salaries
+    totals['Net'] = totals['Salaries Net'] - totals['Other Costs (≈)']
+
+    fig = go.Figure()
+
+    for idx, row in totals.iterrows():
+        year = str(row['Year'])
+        revenue = row['USD Collected Time']
+        salaries = row['Cost in Salary']
+        salaries_net = row['Salaries Net']
+        other_costs = row['Other Costs (≈)']
+        net = row['Net']
+
+        fig.add_trace(go.Waterfall(
+            name=year,
+            orientation="v",
+            measure=["relative", "relative", "total",
+                    "relative", "total"],  # 5 bars
+            x=[
+                f"{year} Revenue",
+                f"{year} Salaries",
+                f"{year} Salaries Net",
+                f"{year} Other Costs (≈)",
+                f"{year} Net"
+            ],
+            y=[revenue, -salaries, salaries_net, -other_costs, net],
+            text=[f"${int(revenue):,}", f"${int(salaries):,}",
+                f"${int(salaries_net):,}", f"${int(other_costs):,}", f"${int(net):,}"],
+            textposition="outside",
+            connector={"line": {"color": "rgb(63, 63, 63)"}},
+            # Salaries / Other Costs negative
+            decreasing={"marker": {"color": "#FF6F61"}},
+            increasing={"marker": {"color": "#3B8EA5"}},  # Revenue positive
+            totals={"marker": {"color": "#2E2E2E"}}      # Totals
+        ))
+
+    fig.update_layout(
+        title="Waterfall Chart Yearly",
+        showlegend=False,
+        yaxis_title="USD",
+        height=600,
+        margin=dict(l=40, r=40, t=60, b=40)
+    )
 
     # Render
     st.plotly_chart(fig)
