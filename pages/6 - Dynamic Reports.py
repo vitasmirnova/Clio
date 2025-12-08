@@ -19,8 +19,7 @@ st.set_page_config(
 )
 
 # Setting a title
-st.title('Clio Reports')
-st.subheader('Management report (Dynamic data)')
+st.title('Dynamic Reports')
 
 #######################################
 # AUTHENTIFICATION
@@ -59,7 +58,7 @@ dynamic_file_name = 'dynamic_data.pkl'
 #######################################
 # PERIOD AND DATA LOADING FROM CLOUD
 #######################################
-
+st.subheader('Quarterly reports')
 # Get all the periods
 periods_list = create_periods_list(conn, folder_path)
 
@@ -119,7 +118,7 @@ visualize_salaries_vs_revenue(
 #######################################
 # VISUALISATION YEARS
 #######################################
-
+st.subheader('Yearly reports')
 st.write(yearly_table)
 
 visualize_years_stacked(full_table)
