@@ -334,8 +334,8 @@ def client_contribution(RR, revenue_column):
         values=revenue_column,
         title=f"Top {round(n*100)}% Clients Contribution to Revenue ({practice_area})",
         hole=0.3,
-        hover_data={'Client': True,
-                        'Client_short': False, revenue_column: True}
+        # hover_data={'Client': True,
+        #                 'Client_short': False, revenue_column: True}
     )
 
 
