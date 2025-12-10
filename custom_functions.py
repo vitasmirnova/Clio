@@ -328,6 +328,9 @@ def client_contribution(RR, revenue_column):
         lambda x: x if len(x) <= MAX_LEN else x[:MAX_LEN] + '…'
     )
 
+    grouped_data['hover_text'] = grouped_data['Client'] + \
+        '\nRevenue: ' + grouped_data[revenue_column].map('{:,.2f}'.format)
+
 
     fig = px.pie(
         grouped_data,
