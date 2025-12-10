@@ -61,7 +61,7 @@ quarters = ["Q1", "Q2", "Q3", "Q4"]
 
 selected_year = st.selectbox("Select year:", years, index=years.index(2025))   # preselect 2025
 selected_quarter = st.selectbox(
-    "Select quarter:", quarters, index=quarters.index("Q3"))  # preselect Q3
+    "Select quarter:", quarters, index=quarters.index("Q4"))  # preselect Q4
 
 chosen_period = f"{selected_quarter}_{selected_year}"
 
