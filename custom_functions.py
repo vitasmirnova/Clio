@@ -291,7 +291,6 @@ def show_margin_table(margin_table, salary_column, revenue_column, currency_labe
 #     fig = px.pie(grouped_data, names='Client', values=revenue_column,
 #                  title=f'Top {round(n*100)}% Clients Contribution to Revenue', hole=0.3)
 #     st.plotly_chart(fig, use_container_width=True)
-
 def client_contribution(RR, revenue_column):
     st.write('')
     st.write('')
@@ -308,31 +307,37 @@ def client_contribution(RR, revenue_column):
 
     n = st.slider("Pick a %", 0, 100, value=20, step=5) / 100
 
+    # Aggregate revenue
     client_contribution = RR.groupby(
         'Client')[revenue_column].sum().reset_index()
     top_clients = client_contribution.sort_values(
         revenue_column, ascending=False).head(int(len(client_contribution) * n))
+
     other_clients = client_contribution[~client_contribution['Client'].isin(
         top_clients['Client'])]
-    other_clients = pd.DataFrame({'Client': ['Other'], revenue_column: [
-                                 other_clients[revenue_column].sum()]})
+    other_clients = pd.DataFrame({
+        'Client': ['Other'],
+        revenue_column: [other_clients[revenue_column].sum()]
+    })
+
     grouped_data = pd.concat([top_clients, other_clients])
 
-    fig = px.pie(grouped_data, names='Client', values=revenue_column,
-                 title=f'Top {round(n*100)}% Clients Contribution to Revenue ({practice_area})', hole=0.3)
-    
-    fig.update_layout(
-        # legend=dict(
-        #     orientation="h",
-        #     yanchor="top",
-        #     y=1,
-        #     xanchor="left",
-        #     x=1.2,
-        #     itemsizing='constant'
-        # ),
-        width=None,   # let Streamlit stretch it
-        height=500)    # or 600 if you want
-    
+    # ---- SHORT LABELS + FULL HOVER ----
+    MAX_LEN = 20
+    grouped_data['Client_short'] = grouped_data['Client'].apply(
+        lambda x: x if len(x) <= MAX_LEN else x[:MAX_LEN] + '…'
+    )
+
+    fig = px.pie(
+        grouped_data,
+        names='Client_short',
+        values=revenue_column,
+        hover_data={'Client': True},     # shows full name
+        title=f"Top {round(n*100)}% Clients Contribution to Revenue ({practice_area})",
+        hole=0.3
+    )
+
+    # Legend on the right, clean
     fig.update_layout(
         legend=dict(
             orientation="v",
@@ -340,12 +345,15 @@ def client_contribution(RR, revenue_column):
             y=1,
             xanchor="left",
             x=1.02,
-            itemwidth=150   # ← forces line breaks
+            itemwidth=150,  # wrap long items
+            font=dict(size=10)
         ),
-        margin=dict(r=150)  # space for legend
+        margin=dict(r=150, t=60, b=40),
+        height=500
     )
-    
+
     st.plotly_chart(fig, use_container_width=True)
+
 
 
 def hours_by_practice(MP):
