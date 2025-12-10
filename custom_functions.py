@@ -325,14 +325,11 @@ def client_contribution(RR, revenue_column):
         legend=dict(
             orientation="h",
             yanchor="bottom",
-            y=-0.25,
+            y=-0.3,
             xanchor="center",
             x=0.5,
-            font=dict(size=10)
-        ),
-        margin=dict(t=50, b=150, l=0, r=0),
-        height=500
-        
+            itemsizing='constant'
+        )
     )
     st.plotly_chart(fig, use_container_width=True)
 
