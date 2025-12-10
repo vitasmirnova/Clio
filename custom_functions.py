@@ -323,14 +323,14 @@ def client_contribution(RR, revenue_column):
     grouped_data = pd.concat([top_clients, other_clients])
 
     # ---- SHORT LABELS + FULL HOVER ----
-    MAX_LEN = 20
-    grouped_data['Client_short'] = grouped_data['Client'].apply(
-        lambda x: x if len(x) <= MAX_LEN else x[:MAX_LEN] + '…'
-    )
+    # MAX_LEN = 30
+    # grouped_data['Client_short'] = grouped_data['Client'].apply(
+    #     lambda x: x if len(x) <= MAX_LEN else x[:MAX_LEN] + '…'
+    # )
 
     fig = px.pie(
         grouped_data,
-        names='Client_short',
+        names='Client',
         values=revenue_column,
         hover_data={'Client': True},     # shows full name
         title=f"Top {round(n*100)}% Clients Contribution to Revenue ({practice_area})",
