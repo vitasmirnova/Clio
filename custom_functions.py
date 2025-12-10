@@ -327,17 +327,26 @@ def client_contribution(RR, revenue_column):
     grouped_data['Client_short'] = grouped_data['Client'].apply(
         lambda x: x if len(x) <= MAX_LEN else x[:MAX_LEN] + '…'
     )
+
+    # Ensure revenue is numeric
+    grouped_data[revenue_column] = grouped_data[revenue_column].astype(float)
+
+    # Prepare custom data for hover: full client name + revenue as float
+    customdata = grouped_data[['Client', revenue_column]].to_numpy()
    
+
     fig = px.pie(
         grouped_data,
         names='Client_short',
         values=revenue_column,
         title=f"Top {round(n*100)}% Clients Contribution to Revenue ({practice_area})",
         hole=0.3,
-        custom_data=['Client', revenue_column]  # full name + revenue for hover
     )
 
+
+
     fig.update_traces(
+        customdata=customdata,
         hovertemplate="<b>%{customdata[0]}</b><br>Revenue: %{customdata[1]:,.2f}<extra></extra>"
     )
 
