@@ -330,8 +330,9 @@ def client_contribution(RR, revenue_column):
             x=0.5,
             font=dict(size=10)
         ),
-        margin=dict(t=50, b=50, l=0, r=0),
+        margin=dict(t=50, b=150, l=0, r=0),
         height=500
+        
     )
     st.plotly_chart(fig, use_container_width=True)
 
