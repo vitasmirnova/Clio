@@ -320,6 +320,19 @@ def client_contribution(RR, revenue_column):
 
     fig = px.pie(grouped_data, names='Client', values=revenue_column,
                  title=f'Top {round(n*100)}% Clients Contribution to Revenue ({practice_area})', hole=0.3)
+    
+    fig.update_layout(
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.25,
+            xanchor="center",
+            x=0.5,
+            font=dict(size=10)
+        ),
+        margin=dict(t=50, b=50, l=0, r=0),
+        height=500
+    )
     st.plotly_chart(fig, use_container_width=True)
 
 
