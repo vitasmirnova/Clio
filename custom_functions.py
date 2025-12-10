@@ -341,7 +341,7 @@ def client_contribution(RR, revenue_column):
 
 
     fig.update_traces(
-        customdata=customdata,
+        customdata=grouped_data[[revenue_column]],
         hovertemplate="<b>%{customdata[0]}</b><br>Revenue: %{customdata[1]}<extra></extra>"
     )
 
