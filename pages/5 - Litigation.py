@@ -142,10 +142,10 @@ with middle_right_line:
         show_margin_table(mt, salary_column,
                           revenue_column, currency_label)
 
-with lower_left_line:
-    with st.container(border=True):
-        client_contribution(RR, revenue_column)
+# with lower_left_line:
+#     with st.container(border=True):
+client_contribution(RR, revenue_column)
 
-with lower_right_line:
-    with st.container(border=True):
-        hours_by_practice(MP)
+# with lower_right_line:
+#     with st.container(border=True):
+hours_by_practice(MP)

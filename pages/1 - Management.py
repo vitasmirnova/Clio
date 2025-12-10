@@ -132,7 +132,7 @@ total_salaries = mt[salary_column].sum()
 
 top_left_line, top_right_line = st.columns((2, 2))
 middle_left_line, middle_right_line = st.columns((1.8, 1.5), gap="medium")
-lower_left_line, lower_right_line = st.columns(2, gap="medium")
+# lower_left_line, lower_right_line = st.columns(2, gap="medium")
 
 with top_left_line:
     with st.container(border=True):
@@ -153,13 +153,11 @@ with middle_right_line:
         show_margin_table(mt, salary_column,
                           revenue_column, currency_label)
 
-with lower_left_line:
-    with st.container(border=True):
-        client_contribution(RR, revenue_column)
 
-with lower_right_line:
-    with st.container(border=True):
-        hours_by_practice(MP)
+client_contribution(RR, revenue_column)
+
+
+hours_by_practice(MP)
 
 
 try:
