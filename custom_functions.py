@@ -338,7 +338,7 @@ def client_contribution(RR, revenue_column):
     )
 
     # Custom data: full client name + revenue
-    customdata = grouped_data[['Client', 'Revenue']].to_numpy()
+    customdata = grouped_data[['Client', 'USD Collected Time']].to_numpy()
 
 
     fig.update_traces(
