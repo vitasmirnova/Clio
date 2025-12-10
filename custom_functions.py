@@ -335,13 +335,13 @@ def client_contribution(RR, revenue_column):
         values=revenue_column,
         title=f"Top {round(n*100)}% Clients Contribution to Revenue ({practice_area})",
         hole=0.3,
-        custom_data=['Client', revenue_column]
+        # custom_data=['Client', revenue_column]
     )
 
 
 
     fig.update_traces(
-        customdata=grouped_data[[revenue_column]],
+        customdata=grouped_data[['Client', revenue_column]],
         hovertemplate="<b>%{customdata[0]}</b><br>Revenue: %{customdata[1]}<extra></extra>"
     )
 
