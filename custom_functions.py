@@ -345,7 +345,7 @@ def client_contribution(RR, revenue_column):
             y=1,
             xanchor="left",
             x=1.02,
-            itemwidth=50,  # wrap long items
+            itemwidth=100,  # wrap long items
             font=dict(size=10)
         ),
         margin=dict(r=150, t=60, b=40),
