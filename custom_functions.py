@@ -332,18 +332,16 @@ def client_contribution(RR, revenue_column):
         grouped_data,
         names='Client_short',
         values=revenue_column,
-        # hover_data={'Client': True},     # shows full name
         title=f"Top {round(n*100)}% Clients Contribution to Revenue ({practice_area})",
         hole=0.3,
         hover_name="Client",             # full name only
         hover_data={revenue_column: True, 'Client_short': False},
     )
 
-    # fig.update_traces(
-    #     customdata=grouped_data[['Client', revenue_column]],
-    #     hovertemplate="<b>%{customdata[0]}</b><br>" +
-    #     "Revenue: %{customdata[1]:,.2f}<extra></extra>"
-    # )
+    fig.update_traces(
+        customdata=grouped_data[[revenue_column]],
+        hovertemplate="Revenue: %{customdata[0]:,.2f}<extra></extra>"
+    )
 
     # Legend on the right, clean
     fig.update_layout(
