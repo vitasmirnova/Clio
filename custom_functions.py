@@ -326,11 +326,14 @@ def client_contribution(RR, revenue_column):
             orientation="h",
             yanchor="bottom",
             y=-0.3,
-            xanchor="center",
+            xanchor="right",
             x=0.5,
             itemsizing='constant'
-        )
-    )
+        ),
+        width=None,   # let Streamlit stretch it
+        height=500)    # or 600 if you want
+    
+    
     st.plotly_chart(fig, use_container_width=True)
 
 
