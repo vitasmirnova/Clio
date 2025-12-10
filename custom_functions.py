@@ -324,10 +324,10 @@ def client_contribution(RR, revenue_column):
     fig.update_layout(
         legend=dict(
             orientation="h",
-            yanchor="bottom",
-            y=-0.3,
-            xanchor="right",
-            x=0.5,
+            yanchor="top",
+            y=1,
+            xanchor="left",
+            x=1.2,
             itemsizing='constant'
         ),
         width=None,   # let Streamlit stretch it
