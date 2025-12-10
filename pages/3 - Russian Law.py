@@ -89,7 +89,7 @@ else:
 
 with st.expander("Data Viewer"):
 
-    simple_view = st.checkbox('Simple View')
+    simple_view = st.checkbox('Simple View', value=True)
 
     # Add separate Data Viewer to view data without editing it
     st.subheader('Data Viewer (Revenue Report)')
