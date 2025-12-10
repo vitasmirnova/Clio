@@ -322,17 +322,28 @@ def client_contribution(RR, revenue_column):
                  title=f'Top {round(n*100)}% Clients Contribution to Revenue ({practice_area})', hole=0.3)
     
     fig.update_layout(
-        legend=dict(
-            orientation="h",
-            yanchor="top",
-            y=1,
-            xanchor="left",
-            x=1.2,
-            itemsizing='constant'
-        ),
+        # legend=dict(
+        #     orientation="h",
+        #     yanchor="top",
+        #     y=1,
+        #     xanchor="left",
+        #     x=1.2,
+        #     itemsizing='constant'
+        # ),
         width=None,   # let Streamlit stretch it
         height=500)    # or 600 if you want
     
+    fig.update_layout(
+        legend=dict(
+            orientation="v",
+            yanchor="top",
+            y=1,
+            xanchor="left",
+            x=1.02,
+            itemwidth=150   # ← forces line breaks
+        ),
+        margin=dict(r=150)  # space for legend
+    )
     
     st.plotly_chart(fig, use_container_width=True)
 
