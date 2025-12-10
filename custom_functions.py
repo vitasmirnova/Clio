@@ -337,7 +337,6 @@ def client_contribution(RR, revenue_column):
         hover_name='Client',
         hover_data={revenue_column: True}
     )
-    st.write(grouped_data.head())
 
     # Legend on the right, clean
     fig.update_layout(
